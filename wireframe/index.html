@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMTL - Sistem Monitoring Tindak Lanjut</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // UNJ Color Palette - Hijau & Kuning/Gold
+                        primary: { 50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac', 400: '#4ade80', 500: '#006838', 600: '#005a30', 700: '#004d28', 800: '#003d20', 900: '#002d18' },
+                        accent: { 50: '#fffbeb', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d', 400: '#fbbf24', 500: '#f4b41a', 600: '#d97706', 700: '#b45309', 800: '#92400e', 900: '#78350f' },
+                        unj: { green: '#006838', gold: '#f4b41a', darkgreen: '#004d28', lightgreen: '#e8f5e9' },
+                        slate: { 850: '#1a2e1a', 900: '#0f1f0f', 950: '#0a150a' }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #f8fafc; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Sidebar Dark Theme - UNJ Green */
+        .sidebar { background: linear-gradient(180deg, #003d20 0%, #006838 100%); }
+        
+        .nav-item { 
+            position: relative; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+            margin: 4px 12px;
+        }
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #f4b41a, #fbbf24);
+            border-radius: 0 4px 4px 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .nav-item:hover { background: rgba(244, 180, 26, 0.15); }
+        .nav-item.active { background: linear-gradient(90deg, rgba(244, 180, 26, 0.25), transparent); }
+        .nav-item.active::before, .nav-item:hover::before { opacity: 1; }
+        .nav-item.active .nav-icon { color: #f4b41a; }
+        .nav-item.active .nav-text { color: #fff; font-weight: 600; }
+        
+        /* Cards */
+        .card { 
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+        
+        /* Stat Cards with Gradient Border */
+        .stat-card {
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--gradient);
+        }
+        .stat-card:hover { transform: translateY(-6px); box-shadow: 0 25px 50px rgba(0,0,0,0.1); }
+        .stat-card:hover .stat-icon { transform: scale(1.15) rotate(10deg); }
+        .stat-icon { transition: all 0.4s ease; }
+        
+        /* Gradients - UNJ Theme */
+        .gradient-primary { --gradient: linear-gradient(135deg, #006838, #004d28); background: linear-gradient(135deg, #006838, #004d28); }
+        .gradient-indigo { --gradient: linear-gradient(135deg, #006838, #004d28); background: linear-gradient(135deg, #006838, #004d28); }
+        .gradient-emerald { --gradient: linear-gradient(135deg, #059669, #047857); background: linear-gradient(135deg, #059669, #047857); }
+        .gradient-amber { --gradient: linear-gradient(135deg, #f4b41a, #d97706); background: linear-gradient(135deg, #f4b41a, #d97706); }
+        .gradient-gold { --gradient: linear-gradient(135deg, #f4b41a, #fbbf24); background: linear-gradient(135deg, #f4b41a, #fbbf24); }
+        .gradient-rose { --gradient: linear-gradient(135deg, #e11d48, #be123c); background: linear-gradient(135deg, #e11d48, #be123c); }
+        .gradient-blue { --gradient: linear-gradient(135deg, #0ea5e9, #0284c7); background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+        .gradient-purple { --gradient: linear-gradient(135deg, #006838, #00a050); background: linear-gradient(135deg, #006838, #00a050); }
+        .gradient-cyan { --gradient: linear-gradient(135deg, #14b8a6, #0d9488); background: linear-gradient(135deg, #14b8a6, #0d9488); }
+        
+        /* Buttons - UNJ Theme */
+        .btn-primary {
+            background: linear-gradient(135deg, #006838, #004d28);
+            box-shadow: 0 4px 15px rgba(0, 104, 56, 0.35);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 104, 56, 0.45);
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.show { opacity: 1; visibility: visible; }
+        .modal-content {
+            transform: scale(0.95) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modal-overlay.show .modal-content { transform: scale(1) translateY(0); }
+        
+        /* Input */
+        .input-field {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            border-color: #006838;
+            box-shadow: 0 0 0 4px rgba(0, 104, 56, 0.1);
+            outline: none;
+        }
+        
+        /* Progress Bar Animation */
+        .progress-fill {
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+        
+        /* Avatar - UNJ Theme */
+        .avatar-ring {
+            padding: 3px;
+            background: linear-gradient(135deg, #006838, #f4b41a);
+            border-radius: 50%;
+        }
+        
+        /* Notification Badge */
+        .notif-badge {
+            animation: pulse-badge 2s infinite;
+        }
+        @keyframes pulse-badge {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+            50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+        }
+        
+        /* Table Row - UNJ Theme */
+        .table-row:hover { background: linear-gradient(90deg, rgba(0, 104, 56, 0.04), transparent); }
+        
+        /* Feature Card */
+        .feature-card { transition: all 0.4s ease; }
+        .feature-card:hover { transform: translateY(-8px); box-shadow: 0 25px 50px rgba(0,0,0,0.1); }
+        .feature-card:hover .feature-icon { transform: scale(1.2); }
+        .feature-icon { transition: transform 0.4s ease; }
+        
+        /* Activity Item */
+        .activity-item { transition: all 0.2s ease; }
+        .activity-item:hover { transform: translateX(8px); background: #f8fafc; }
+        
+        /* Status Badge */
+        .status-badge { animation: badge-glow 2s infinite; }
+        @keyframes badge-glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Upload Zone - UNJ Theme */
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        .upload-zone:hover {
+            border-color: #006838;
+            background: rgba(0, 104, 56, 0.02);
+        }
+        
+        /* Toast */
+        .toast { animation: slideIn 0.5s ease; }
+        @keyframes slideIn { 0% { transform: translateX(100%); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        
+        /* Chart Container */
+        .chart-container canvas { max-height: 250px; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Sidebar -->
+    <aside class="sidebar fixed left-0 top-0 bottom-0 w-72 z-50 flex flex-col">
+        <!-- Logo -->
+        <div class="p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center shadow-lg shadow-green-900/40 border-2 border-amber-400">
+                <i class="fas fa-clipboard-check text-amber-300 text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-white text-xl font-bold tracking-tight">SIMTL <span class="text-amber-400">UNJ</span></h1>
+                <p class="text-green-100/70 text-xs">Monitoring Tindak Lanjut</p>
+            </div>
+        </div>
+        
+        <!-- User Profile -->
+        <div class="px-5 py-4 mx-4 mb-4 rounded-2xl bg-green-900/30 border border-green-700/50">
+            <div class="flex items-center gap-3">
+                <div class="avatar-ring">
+                    <div class="w-10 h-10 rounded-full bg-green-800 flex items-center justify-center text-white font-bold" id="userAvatar">SA</div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-white font-semibold text-sm truncate" id="userName">Super Admin</p>
+                    <p class="text-green-100/60 text-xs truncate" id="userRoleText">Administrator</p>
+                </div>
+                <div class="w-2 h-2 rounded-full bg-amber-400"></div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-2" id="sidebarNav"></nav>
+        
+        <!-- Role Switcher -->
+        <div class="p-4 border-t border-green-700/50">
+            <label class="text-green-100 text-xs font-medium mb-2 block">Ganti Role</label>
+            <select id="roleSelector" onchange="changeRole(this.value)" class="w-full px-4 py-3 bg-green-900/50 border border-green-700 rounded-xl text-white text-sm focus:ring-2 focus:ring-amber-400 focus:border-transparent cursor-pointer">
+                <option value="superadmin">🔐 Superadmin</option>
+                <option value="auditor">📋 Admin SPI / Auditor</option>
+                <option value="pic">👤 User PIC</option>
+                <option value="verifikator">✅ Verifikator</option>
+                <option value="ketua">👔 Ketua SPI</option>
+                <option value="pimpinan">🏛️ Pimpinan</option>
+            </select>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-72">
+        <!-- Top Bar -->
+        <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-100">
+            <div class="flex items-center justify-between px-8 py-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800" id="pageTitle">Dashboard</h2>
+                    <p class="text-slate-500 text-sm" id="pageSubtitle">Selamat datang di SIMTL</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <!-- Search -->
+                    <div class="relative">
+                        <input type="text" placeholder="Cari..." class="w-64 pl-11 pr-4 py-2.5 bg-slate-50 border-0 rounded-xl text-sm focus:ring-2 focus:ring-green-600">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <button class="relative w-11 h-11 rounded-xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center transition-colors">
+                        <i class="fas fa-bell text-slate-600"></i>
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center notif-badge">3</span>
+                    </button>
+                    
+                    <!-- Profile -->
+                    <div class="flex items-center gap-3 pl-4 border-l border-slate-200">
+                        <div class="avatar-ring">
+                            <div class="w-9 h-9 rounded-full bg-green-700 flex items-center justify-center text-white font-bold text-sm" id="headerAvatar">SA</div>
+                        </div>
+                        <div class="hidden sm:block">
+                            <p class="text-sm font-semibold text-slate-700" id="headerUserName">Super Admin</p>
+                            <p class="text-xs text-slate-500">Online</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Page Content -->
+        <div class="p-8" id="mainContent"></div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Modal: Input LHP -->
+    <div id="modalLHP" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
+                        <i class="fas fa-file-alt text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Input Data LHP</h3>
+                </div>
+                <button onclick="closeModal('modalLHP')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times text-slate-400"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Nomor LHP</label>
+                    <input type="text" placeholder="LHP/001/2024" class="input-field w-full px-4 py-3 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Judul LHP</label>
+                    <input type="text" placeholder="Masukkan judul LHP" class="input-field w-full px-4 py-3 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Tanggal</label>
+                        <input type="date" class="input-field w-full px-4 py-3 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Jenis Audit</label>
+                        <select class="input-field w-full px-4 py-3 text-sm">
+                            <option>Internal</option>
+                            <option>Eksternal</option>
+                            <option>Khusus</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 bg-slate-50 rounded-b-3xl flex justify-end gap-3">
+                <button onclick="closeModal('modalLHP')" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Batal</button>
+                <button onclick="closeModal('modalLHP')" class="btn-primary px-6 py-2.5 text-sm font-semibold text-white rounded-xl">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Input Temuan -->
+    <div id="modalTemuan" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl gradient-amber flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Input Detail Temuan</h3>
+                </div>
+                <button onclick="closeModal('modalTemuan')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times text-slate-400"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">LHP Induk</label>
+                    <select class="input-field w-full px-4 py-3 text-sm">
+                        <option>LHP/001/2024 - Audit Keuangan Tahunan</option>
+                        <option>LHP/002/2024 - Audit Operasional</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Kondisi/Temuan</label>
+                    <textarea rows="3" placeholder="Deskripsikan kondisi yang ditemukan..." class="input-field w-full px-4 py-3 text-sm resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Rekomendasi</label>
+                    <textarea rows="3" placeholder="Masukkan rekomendasi perbaikan..." class="input-field w-full px-4 py-3 text-sm resize-none"></textarea>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Nilai (Rp)</label>
+                        <input type="number" placeholder="0" class="input-field w-full px-4 py-3 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Tingkat Risiko</label>
+                        <select class="input-field w-full px-4 py-3 text-sm">
+                            <option value="tinggi">🔴 Tinggi</option>
+                            <option value="sedang">🟡 Sedang</option>
+                            <option value="rendah">🟢 Rendah</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Deadline</label>
+                        <input type="date" class="input-field w-full px-4 py-3 text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Assign ke PIC</label>
+                    <select class="input-field w-full px-4 py-3 text-sm">
+                        <option>Fakultas Teknik - John Doe</option>
+                        <option>Fakultas Ekonomi - Jane Doe</option>
+                        <option>Rektorat - Ahmad Rizki</option>
+                    </select>
+                </div>
+            </div>
+            <div class="p-6 bg-slate-50 rounded-b-3xl flex justify-end gap-3">
+                <button onclick="closeModal('modalTemuan')" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Batal</button>
+                <button onclick="closeModal('modalTemuan')" class="btn-primary px-6 py-2.5 text-sm font-semibold text-white rounded-xl">Simpan & Publish</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Upload Eviden -->
+    <div id="modalEviden" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl gradient-emerald flex items-center justify-center">
+                        <i class="fas fa-cloud-upload-alt text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Upload Bukti Tindak Lanjut</h3>
+                </div>
+                <button onclick="closeModal('modalEviden')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times text-slate-400"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Uraian Tindak Lanjut</label>
+                    <textarea rows="4" placeholder="Jelaskan langkah-langkah yang telah dilakukan..." class="input-field w-full px-4 py-3 text-sm resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Upload Dokumen</label>
+                    <div class="upload-zone rounded-2xl p-8 text-center cursor-pointer">
+                        <div class="w-16 h-16 rounded-2xl bg-green-50 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-cloud-upload-alt text-2xl text-green-700"></i>
+                        </div>
+                        <p class="text-slate-700 font-medium mb-1">Drag & drop files atau klik untuk upload</p>
+                        <p class="text-slate-400 text-sm">PDF, PNG, JPG (Max 10MB)</p>
+                    </div>
+                </div>
+                <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                        <p class="text-sm text-blue-700">File yang sudah diupload tidak dapat dihapus, hanya bisa ditambah versi baru untuk menjaga audit trail.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 bg-slate-50 rounded-b-3xl flex justify-end gap-3">
+                <button onclick="closeModal('modalEviden')" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Batal</button>
+                <button onclick="closeModal('modalEviden')" class="px-6 py-2.5 text-sm font-semibold text-white rounded-xl gradient-emerald">Submit untuk Verifikasi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Review Verifikasi -->
+    <div id="modalVerifikasi" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl gradient-blue flex items-center justify-center">
+                        <i class="fas fa-clipboard-check text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Review & Verifikasi Dokumen</h3>
+                </div>
+                <button onclick="closeModal('modalVerifikasi')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times text-slate-400"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold text-slate-800 mb-4">Preview Dokumen</h4>
+                        <div class="bg-slate-100 rounded-2xl h-64 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="w-16 h-16 rounded-2xl bg-red-100 flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-file-pdf text-2xl text-red-500"></i>
+                                </div>
+                                <p class="text-sm font-medium text-slate-700">Bukti_TL_001.pdf</p>
+                                <button class="mt-2 text-sm text-green-700 hover:text-green-800 font-medium">
+                                    <i class="fas fa-external-link-alt mr-1"></i>Lihat Full
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 mt-4">
+                            <div class="flex-1 p-3 bg-slate-50 rounded-xl text-center cursor-pointer hover:bg-slate-100 transition-colors">
+                                <i class="fas fa-file-image text-blue-500"></i>
+                                <p class="text-xs text-slate-500 mt-1">Foto_1.jpg</p>
+                            </div>
+                            <div class="flex-1 p-3 bg-slate-50 rounded-xl text-center cursor-pointer hover:bg-slate-100 transition-colors">
+                                <i class="fas fa-file-image text-blue-500"></i>
+                                <p class="text-xs text-slate-500 mt-1">Foto_2.jpg</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-slate-800 mb-4">Checklist Kelengkapan</h4>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-4 border-2 border-slate-100 rounded-xl hover:border-green-200 hover:bg-green-50/50 cursor-pointer transition-all">
+                                <input type="checkbox" class="w-5 h-5 text-green-700 rounded-lg border-slate-300 focus:ring-green-600">
+                                <span class="ml-3 text-sm text-slate-700">Format dokumen sesuai ketentuan</span>
+                            </label>
+                            <label class="flex items-center p-4 border-2 border-slate-100 rounded-xl hover:border-green-200 hover:bg-green-50/50 cursor-pointer transition-all">
+                                <input type="checkbox" class="w-5 h-5 text-green-700 rounded-lg border-slate-300 focus:ring-green-600">
+                                <span class="ml-3 text-sm text-slate-700">Tanda tangan/cap resmi tersedia</span>
+                            </label>
+                            <label class="flex items-center p-4 border-2 border-slate-100 rounded-xl hover:border-green-200 hover:bg-green-50/50 cursor-pointer transition-all">
+                                <input type="checkbox" class="w-5 h-5 text-green-700 rounded-lg border-slate-300 focus:ring-green-600">
+                                <span class="ml-3 text-sm text-slate-700">Uraian tindak lanjut jelas dan lengkap</span>
+                            </label>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Catatan Revisi</label>
+                            <textarea rows="3" placeholder="Masukkan catatan jika perlu revisi..." class="input-field w-full px-4 py-3 text-sm resize-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 bg-slate-50 rounded-b-3xl flex justify-between">
+                <button onclick="closeModal('modalVerifikasi')" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors">Tutup</button>
+                <div class="flex gap-3">
+                    <button onclick="closeModal('modalVerifikasi')" class="px-6 py-2.5 text-sm font-semibold text-white rounded-xl gradient-rose">
+                        <i class="fas fa-times mr-2"></i>Revisi
+                    </button>
+                    <button onclick="closeModal('modalVerifikasi')" class="px-6 py-2.5 text-sm font-semibold text-white rounded-xl gradient-emerald">
+                        <i class="fas fa-check mr-2"></i>Approve
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: User Management -->
+    <div id="modalUser" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl gradient-purple flex items-center justify-center">
+                        <i class="fas fa-user-plus text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Tambah Pengguna</h3>
+                </div>
+                <button onclick="closeModal('modalUser')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times text-slate-400"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="p-4 bg-green-50 rounded-xl border border-green-100">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-info-circle text-green-700 mt-0.5"></i>
+                        <p class="text-sm text-green-800">Data akan disinkronisasi otomatis dari SIMPEG berdasarkan NIP.</p>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">NIP</label>
+                    <div class="flex gap-2">
+                        <input type="text" placeholder="Masukkan NIP..." class="input-field flex-1 px-4 py-3 text-sm">
+                        <button class="w-12 h-12 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center transition-colors">
+                            <i class="fas fa-search text-slate-500"></i>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Nama Lengkap</label>
+                    <input type="text" placeholder="Auto-fill dari SIMPEG" class="input-field w-full px-4 py-3 text-sm bg-slate-50" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Unit Kerja</label>
+                    <input type="text" placeholder="Auto-fill dari SIMPEG" class="input-field w-full px-4 py-3 text-sm bg-slate-50" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Role</label>
+                    <select class="input-field w-full px-4 py-3 text-sm">
+                        <option>Admin SPI / Auditor</option>
+                        <option>Verifikator</option>
+                        <option>Ketua SPI</option>
+                        <option>User PIC</option>
+                        <option>Pimpinan</option>
+                    </select>
+                </div>
+            </div>
+            <div class="p-6 bg-slate-50 rounded-b-3xl flex justify-end gap-3">
+                <button onclick="closeModal('modalUser')" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Batal</button>
+                <button onclick="closeModal('modalUser')" class="btn-primary px-6 py-2.5 text-sm font-semibold text-white rounded-xl">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
+        <div class="toast bg-white rounded-2xl shadow-2xl p-4 flex items-center gap-4 border border-slate-100">
+            <div class="w-12 h-12 rounded-xl gradient-emerald flex items-center justify-center">
+                <i class="fas fa-check text-white"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-slate-800">Berhasil!</p>
+                <p class="text-sm text-slate-500">Data telah disimpan dengan sukses.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Menu config per role
+        const menuConfig = {
+            superadmin: [
+                { icon: 'fa-th-large', label: 'Dashboard', page: 'dashboard' },
+                { icon: 'fa-users', label: 'Kelola User', page: 'users' },
+                { icon: 'fa-building', label: 'Kelola Satker', page: 'satker' },
+                { icon: 'fa-history', label: 'Audit Trail', page: 'audit-trail' },
+                { icon: 'fa-sync-alt', label: 'Sync SIMPEG', page: 'sync' },
+                { icon: 'fa-cog', label: 'Konfigurasi', page: 'config' }
+            ],
+            auditor: [
+                { icon: 'fa-th-large', label: 'Dashboard', page: 'dashboard' },
+                { icon: 'fa-file-alt', label: 'Data LHP', page: 'lhp' },
+                { icon: 'fa-exclamation-circle', label: 'Temuan', page: 'temuan' },
+                { icon: 'fa-user-tag', label: 'Penugasan', page: 'penugasan' },
+                { icon: 'fa-chart-bar', label: 'Laporan', page: 'laporan' }
+            ],
+            pic: [
+                { icon: 'fa-th-large', label: 'Dashboard', page: 'dashboard-pic' },
+                { icon: 'fa-tasks', label: 'Tugas Saya', page: 'tugas' },
+                { icon: 'fa-cloud-upload-alt', label: 'Upload Eviden', page: 'eviden' },
+                { icon: 'fa-history', label: 'Riwayat', page: 'riwayat' }
+            ],
+            verifikator: [
+                { icon: 'fa-th-large', label: 'Dashboard', page: 'dashboard' },
+                { icon: 'fa-clipboard-check', label: 'Review Dokumen', page: 'review' },
+                { icon: 'fa-clock', label: 'Pending', page: 'pending' },
+                { icon: 'fa-history', label: 'Riwayat', page: 'riwayat-verif' }
+            ],
+            ketua: [
+                { icon: 'fa-th-large', label: 'Dashboard', page: 'dashboard' },
+                { icon: 'fa-gavel', label: 'Approval Final', page: 'approval' },
+                { icon: 'fa-chart-pie', label: 'Monitoring', page: 'monitoring' },
+                { icon: 'fa-file-export', label: 'Laporan', page: 'laporan-ketua' }
+            ],
+            pimpinan: [
+                { icon: 'fa-th-large', label: 'Dashboard Eksekutif', page: 'dashboard-exec' },
+                { icon: 'fa-chart-line', label: 'Analitik', page: 'analitik' },
+                { icon: 'fa-search', label: 'Cari Temuan', page: 'search' }
+            ]
+        };
+
+        const roleInfo = {
+            superadmin: { name: 'Super Admin', initials: 'SA', role: 'Administrator' },
+            auditor: { name: 'Admin SPI', initials: 'AS', role: 'Auditor' },
+            pic: { name: 'User PIC', initials: 'UP', role: 'Person in Charge' },
+            verifikator: { name: 'Verifikator', initials: 'VR', role: 'Staff SPI' },
+            ketua: { name: 'Ketua SPI', initials: 'KS', role: 'Pimpinan SPI' },
+            pimpinan: { name: 'Pimpinan', initials: 'PM', role: 'Executive' }
+        };
+
+        let currentRole = 'superadmin';
+        let currentPage = 'dashboard';
+
+        function changeRole(role) {
+            currentRole = role;
+            const info = roleInfo[role];
+            
+            document.getElementById('userName').textContent = info.name;
+            document.getElementById('userRoleText').textContent = info.role;
+            document.getElementById('userAvatar').textContent = info.initials;
+            document.getElementById('headerUserName').textContent = info.name;
+            document.getElementById('headerAvatar').textContent = info.initials;
+            
+            renderSidebar();
+            const firstMenu = menuConfig[role][0];
+            navigateTo(firstMenu.page);
+        }
+
+        function renderSidebar() {
+            const nav = document.getElementById('sidebarNav');
+            const menus = menuConfig[currentRole] || [];
+            
+            nav.innerHTML = menus.map((menu, i) => `
+                <a href="#" onclick="navigateTo('${menu.page}'); return false;" 
+                   class="nav-item flex items-center gap-4 px-4 py-3 ${i === 0 ? 'active' : ''}" data-page="${menu.page}">
+                    <i class="fas ${menu.icon} nav-icon w-5 text-center text-slate-400"></i>
+                    <span class="nav-text text-slate-300 text-sm font-medium">${menu.label}</span>
+                </a>
+            `).join('');
+        }
+
+        function navigateTo(page) {
+            currentPage = page;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.page === page);
+            });
+            
+            const content = getPageContent(page);
+            document.getElementById('mainContent').innerHTML = content.html;
+            document.getElementById('pageTitle').textContent = content.title;
+            document.getElementById('pageSubtitle').textContent = content.subtitle;
+            
+            // Initialize charts if needed
+            if (page === 'dashboard' || page === 'dashboard-exec' || page === 'monitoring' || page === 'analitik') {
+                setTimeout(initCharts, 100);
+            }
+        }
+
+        function getPageContent(page) {
+            const pages = {
+                'dashboard': { title: 'Dashboard', subtitle: 'Ringkasan monitoring tindak lanjut', html: getDashboardHTML() },
+                'dashboard-pic': { title: 'Dashboard PIC', subtitle: 'Daftar tugas dan tindak lanjut Anda', html: getDashboardPICHTML() },
+                'dashboard-exec': { title: 'Dashboard Eksekutif', subtitle: 'Ringkasan kinerja organisasi', html: getDashboardExecHTML() },
+                'users': { title: 'Kelola User', subtitle: 'Manajemen pengguna sistem', html: getUsersHTML() },
+                'satker': { title: 'Kelola Satker', subtitle: 'Manajemen unit kerja', html: getSatkerHTML() },
+                'audit-trail': { title: 'Audit Trail', subtitle: 'Log aktivitas sistem', html: getAuditTrailHTML() },
+                'sync': { title: 'Sync SIMPEG', subtitle: 'Sinkronisasi data kepegawaian', html: getSyncHTML() },
+                'config': { title: 'Konfigurasi', subtitle: 'Pengaturan sistem', html: getConfigHTML() },
+                'lhp': { title: 'Data LHP', subtitle: 'Laporan Hasil Pemeriksaan', html: getLHPHTML() },
+                'temuan': { title: 'Daftar Temuan', subtitle: 'Kelola temuan hasil audit', html: getTemuanHTML() },
+                'penugasan': { title: 'Penugasan PIC', subtitle: 'Assign temuan ke unit kerja', html: getPenugasanHTML() },
+                'laporan': { title: 'Export Laporan', subtitle: 'Generate laporan', html: getLaporanHTML() },
+                'tugas': { title: 'Tugas Saya', subtitle: 'Daftar temuan yang perlu ditindaklanjuti', html: getDashboardPICHTML() },
+                'eviden': { title: 'Upload Eviden', subtitle: 'Unggah bukti tindak lanjut', html: getEvidenHTML() },
+                'riwayat': { title: 'Riwayat', subtitle: 'History tindak lanjut Anda', html: getRiwayatHTML() },
+                'review': { title: 'Review Dokumen', subtitle: 'Verifikasi kelengkapan administrasi', html: getReviewHTML() },
+                'pending': { title: 'Pending Review', subtitle: 'Dokumen menunggu verifikasi', html: getReviewHTML() },
+                'riwayat-verif': { title: 'Riwayat Verifikasi', subtitle: 'History review dokumen', html: getRiwayatVerifHTML() },
+                'approval': { title: 'Approval Final', subtitle: 'Validasi substansi tindak lanjut', html: getApprovalHTML() },
+                'monitoring': { title: 'Monitoring', subtitle: 'Pantau progress penyelesaian', html: getDashboardExecHTML() },
+                'laporan-ketua': { title: 'Laporan', subtitle: 'Generate laporan', html: getLaporanHTML() },
+                'analitik': { title: 'Analitik', subtitle: 'Dashboard analitik', html: getDashboardExecHTML() },
+                'search': { title: 'Cari Temuan', subtitle: 'Pencarian data temuan', html: getSearchHTML() }
+            };
+            return pages[page] || pages['dashboard'];
+        }
+
+        function getDashboardHTML() {
+            return `
+                <div class="space-y-8">
+                    <!-- Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        ${[
+                            { label: 'Total Temuan', value: '124', change: '+12%', icon: 'fa-clipboard-list', gradient: 'gradient-primary', color: 'green' },
+                            { label: 'Dalam Proses', value: '45', change: '36%', icon: 'fa-spinner', gradient: 'gradient-amber', color: 'amber' },
+                            { label: 'Selesai', value: '67', change: '54%', icon: 'fa-check-circle', gradient: 'gradient-emerald', color: 'emerald' },
+                            { label: 'Overdue', value: '12', change: '-3', icon: 'fa-exclamation-triangle', gradient: 'gradient-rose', color: 'rose' }
+                        ].map(s => `
+                            <div class="stat-card p-6" style="--gradient: var(--${s.gradient})">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <p class="text-slate-500 text-sm font-medium mb-1">${s.label}</p>
+                                        <p class="text-3xl font-bold text-slate-800">${s.value}</p>
+                                        <p class="text-sm mt-2 ${s.change.startsWith('+') ? 'text-emerald-600' : s.change.startsWith('-') ? 'text-rose-600' : 'text-slate-500'}">${s.change} dari bulan lalu</p>
+                                    </div>
+                                    <div class="stat-icon w-14 h-14 rounded-2xl ${s.gradient} flex items-center justify-center shadow-lg">
+                                        <i class="fas ${s.icon} text-white text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <!-- Charts Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="card p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-bold text-slate-800">Progress per Satker</h3>
+                                <select class="text-sm text-slate-500 border-0 bg-transparent focus:ring-0 cursor-pointer">
+                                    <option>Bulan Ini</option>
+                                    <option>3 Bulan</option>
+                                    <option>Tahun Ini</option>
+                                </select>
+                            </div>
+                            <div class="space-y-5">
+                                ${[
+                                    { name: 'Fakultas Teknik', progress: 85 },
+                                    { name: 'Fakultas Ekonomi', progress: 72 },
+                                    { name: 'Rektorat', progress: 60 },
+                                    { name: 'LPPM', progress: 45 }
+                                ].map(item => `
+                                    <div>
+                                        <div class="flex justify-between mb-2">
+                                            <span class="text-sm font-medium text-slate-700">${item.name}</span>
+                                            <span class="text-sm font-bold text-slate-800">${item.progress}%</span>
+                                        </div>
+                                        <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                            <div class="progress-fill h-full rounded-full gradient-primary" style="width: ${item.progress}%"></div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="card p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-bold text-slate-800">Aktivitas Terbaru</h3>
+                                <a href="#" class="text-sm text-green-700 hover:text-green-800 font-medium">Lihat Semua</a>
+                            </div>
+                            <div class="space-y-4">
+                                ${[
+                                    { icon: 'fa-plus-circle', color: 'emerald', text: 'Temuan baru ditambahkan', time: '5 menit lalu', user: 'John Doe' },
+                                    { icon: 'fa-check-circle', color: 'green', text: 'Tindak lanjut disetujui', time: '1 jam lalu', user: 'Ketua SPI' },
+                                    { icon: 'fa-upload', color: 'amber', text: 'Eviden baru diupload', time: '2 jam lalu', user: 'Ahmad PIC' },
+                                    { icon: 'fa-user-plus', color: 'blue', text: 'User baru ditambahkan', time: '3 jam lalu', user: 'Admin' }
+                                ].map(item => `
+                                    <div class="activity-item flex items-center gap-4 p-3 rounded-xl cursor-pointer">
+                                        <div class="w-10 h-10 rounded-xl bg-${item.color}-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas ${item.icon} text-${item.color}-600"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm text-slate-700"><span class="font-semibold">${item.user}</span> ${item.text}</p>
+                                            <p class="text-xs text-slate-400">${item.time}</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart -->
+                    <div class="card p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-slate-800">Trend Penyelesaian</h3>
+                            <div class="flex gap-4">
+                                <span class="flex items-center gap-2 text-sm"><span class="w-3 h-3 rounded-full gradient-primary"></span> Selesai</span>
+                                <span class="flex items-center gap-2 text-sm"><span class="w-3 h-3 rounded-full gradient-gold"></span> Dalam Proses</span>
+                            </div>
+                        </div>
+                        <div class="chart-container h-64">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getDashboardPICHTML() {
+            return `
+                <div class="space-y-8">
+                    <!-- Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="card p-6 border-l-4 border-amber-500">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-slate-500 text-sm mb-1">Belum Ditindaklanjuti</p>
+                                    <p class="text-4xl font-bold text-slate-800">5</p>
+                                </div>
+                                <div class="w-14 h-14 rounded-2xl gradient-amber flex items-center justify-center">
+                                    <i class="fas fa-hourglass-half text-white text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-6 border-l-4 border-green-600">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-slate-500 text-sm mb-1">Dalam Verifikasi</p>
+                                    <p class="text-4xl font-bold text-slate-800">3</p>
+                                </div>
+                                <div class="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center">
+                                    <i class="fas fa-clock text-white text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-6 border-l-4 border-emerald-500">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-slate-500 text-sm mb-1">Selesai</p>
+                                    <p class="text-4xl font-bold text-slate-800">12</p>
+                                </div>
+                                <div class="w-14 h-14 rounded-2xl gradient-emerald flex items-center justify-center">
+                                    <i class="fas fa-check-circle text-white text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Task List -->
+                    <div class="card overflow-hidden">
+                        <div class="p-6 border-b border-slate-100">
+                            <h3 class="text-lg font-bold text-slate-800">Tugas yang Perlu Ditindaklanjuti</h3>
+                        </div>
+                        <div class="divide-y divide-slate-100">
+                            ${[
+                                { id: 'TM-001', title: 'Perbaikan sistem pencatatan keuangan', risk: 'tinggi', deadline: '15 Apr 2024', status: 'belum' },
+                                { id: 'TM-002', title: 'Update SOP pengadaan barang', risk: 'sedang', deadline: '20 Apr 2024', status: 'revisi' },
+                                { id: 'TM-003', title: 'Dokumentasi aset inventaris', risk: 'rendah', deadline: '25 Apr 2024', status: 'belum' }
+                            ].map(task => `
+                                <div class="p-6 hover:bg-slate-50 transition-colors cursor-pointer" onclick="openModal('modalEviden')">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 rounded-xl ${task.risk === 'tinggi' ? 'bg-rose-100' : task.risk === 'sedang' ? 'bg-amber-100' : 'bg-emerald-100'} flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-exclamation-triangle ${task.risk === 'tinggi' ? 'text-rose-600' : task.risk === 'sedang' ? 'text-amber-600' : 'text-emerald-600'}"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="text-sm font-bold text-green-700">${task.id}</span>
+                                                <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${task.risk === 'tinggi' ? 'bg-rose-100 text-rose-700' : task.risk === 'sedang' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">${task.risk.toUpperCase()}</span>
+                                            </div>
+                                            <p class="font-semibold text-slate-800 truncate">${task.title}</p>
+                                            <p class="text-sm text-slate-500">Deadline: ${task.deadline}</p>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="px-3 py-1.5 rounded-full text-xs font-semibold ${task.status === 'revisi' ? 'bg-amber-100 text-amber-700 status-badge' : 'bg-slate-100 text-slate-600'}">
+                                                ${task.status === 'revisi' ? 'Perlu Revisi' : 'Belum TL'}
+                                            </span>
+                                            <i class="fas fa-chevron-right text-slate-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getDashboardExecHTML() {
+            return `
+                <div class="space-y-8">
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="card p-6 col-span-2">
+                            <h3 class="text-lg font-bold text-slate-800 mb-4">Completion Rate</h3>
+                            <div class="flex items-center gap-8">
+                                <div class="relative w-32 h-32">
+                                    <svg class="w-32 h-32 transform -rotate-90">
+                                        <circle cx="64" cy="64" r="56" stroke="#e2e8f0" stroke-width="12" fill="none"/>
+                                        <circle cx="64" cy="64" r="56" stroke="url(#grad)" stroke-width="12" fill="none" stroke-dasharray="${2*Math.PI*56}" stroke-dashoffset="${2*Math.PI*56*(1-0.72)}" stroke-linecap="round"/>
+                                        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#006838"/><stop offset="100%" stop-color="#00a050"/></linearGradient></defs>
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span class="text-3xl font-bold text-slate-800">72%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-slate-500 mb-1">Total temuan selesai</p>
+                                    <p class="text-2xl font-bold text-slate-800">89 dari 124</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-6 gradient-rose text-white">
+                            <p class="text-white/80 text-sm mb-1">Risiko Tinggi</p>
+                            <p class="text-4xl font-bold mb-2">8</p>
+                            <p class="text-sm text-white/70">Butuh perhatian segera</p>
+                        </div>
+                        <div class="card p-6 gradient-emerald text-white">
+                            <p class="text-white/80 text-sm mb-1">On Track</p>
+                            <p class="text-4xl font-bold mb-2">85%</p>
+                            <p class="text-sm text-white/70">Sesuai target</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="card p-6">
+                            <h3 class="text-lg font-bold text-slate-800 mb-6">Performa per Unit Kerja</h3>
+                            <div class="chart-container h-64">
+                                <canvas id="satkerChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-lg font-bold text-slate-800 mb-6">Distribusi Status</h3>
+                            <div class="chart-container h-64">
+                                <canvas id="statusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getUsersHTML() {
+            return `
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari user..." class="input-field pl-11 pr-4 py-2.5 w-80 text-sm">
+                                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            </div>
+                            <select class="input-field px-4 py-2.5 text-sm">
+                                <option>Semua Role</option>
+                                <option>Admin SPI</option>
+                                <option>Verifikator</option>
+                                <option>Ketua SPI</option>
+                                <option>PIC</option>
+                            </select>
+                        </div>
+                        <button onclick="openModal('modalUser')" class="btn-primary px-5 py-2.5 text-sm font-semibold text-white rounded-xl flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Tambah User
+                        </button>
+                    </div>
+                    
+                    <div class="card overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">User</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">NIP</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Role</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Unit Kerja</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                ${[
+                                    { name: 'John Doe', nip: '19850101001', role: 'Admin SPI', unit: 'SPI', status: 'aktif' },
+                                    { name: 'Jane Smith', nip: '19900215002', role: 'Verifikator', unit: 'SPI', status: 'aktif' },
+                                    { name: 'Ahmad Rizki', nip: '19880520003', role: 'PIC', unit: 'Fakultas Teknik', status: 'aktif' },
+                                    { name: 'Siti Rahma', nip: '19920310004', role: 'Ketua SPI', unit: 'SPI', status: 'aktif' }
+                                ].map(user => `
+                                    <tr class="table-row transition-colors">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="avatar-ring">
+                                                    <div class="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-sm">${user.name.charAt(0)}</div>
+                                                </div>
+                                                <span class="font-semibold text-slate-800">${user.name}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-slate-600 text-sm">${user.nip}</td>
+                                        <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">${user.role}</span></td>
+                                        <td class="px-6 py-4 text-slate-600 text-sm">${user.unit}</td>
+                                        <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">Aktif</span></td>
+                                        <td class="px-6 py-4 text-center">
+                                            <button class="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-green-700"><i class="fas fa-edit"></i></button>
+                                            <button class="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-rose-600"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getSatkerHTML() {
+            return `
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="relative">
+                            <input type="text" placeholder="Cari satker..." class="input-field pl-11 pr-4 py-2.5 w-80 text-sm">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        </div>
+                        <button class="btn-primary px-5 py-2.5 text-sm font-semibold text-white rounded-xl flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Tambah Satker
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${[
+                            { name: 'Fakultas Teknik', code: 'FT-001', pic: 5, temuan: 28, progress: 85 },
+                            { name: 'Fakultas Ekonomi', code: 'FE-002', pic: 4, temuan: 25, progress: 72 },
+                            { name: 'Rektorat', code: 'RKT-003', pic: 3, temuan: 22, progress: 60 },
+                            { name: 'LPPM', code: 'LPPM-004', pic: 2, temuan: 20, progress: 45 },
+                            { name: 'UPT Perpustakaan', code: 'UPT-005', pic: 2, temuan: 15, progress: 80 },
+                            { name: 'Fakultas Hukum', code: 'FH-006', pic: 3, temuan: 14, progress: 90 }
+                        ].map(s => `
+                            <div class="feature-card card p-6">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="feature-icon w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
+                                        <i class="fas fa-building text-white text-xl"></i>
+                                    </div>
+                                    <button class="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                                <h3 class="font-bold text-slate-800 mb-1">${s.name}</h3>
+                                <p class="text-sm text-slate-500 mb-4">Kode: ${s.code}</p>
+                                <div class="flex items-center gap-4 text-sm text-slate-500 mb-4">
+                                    <span><i class="fas fa-users mr-1"></i>${s.pic} PIC</span>
+                                    <span><i class="fas fa-file-alt mr-1"></i>${s.temuan} Temuan</span>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-slate-600">Progress</span>
+                                        <span class="font-bold text-slate-800">${s.progress}%</span>
+                                    </div>
+                                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                        <div class="progress-fill h-full rounded-full gradient-primary" style="width: ${s.progress}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getAuditTrailHTML() {
+            return `
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4">
+                        <div class="relative flex-1">
+                            <input type="text" placeholder="Cari aktivitas..." class="input-field pl-11 pr-4 py-2.5 w-full text-sm">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        </div>
+                        <input type="date" class="input-field px-4 py-2.5 text-sm">
+                        <select class="input-field px-4 py-2.5 text-sm">
+                            <option>Semua Aksi</option>
+                            <option>CREATE</option>
+                            <option>UPDATE</option>
+                            <option>DELETE</option>
+                        </select>
+                    </div>
+                    
+                    <div class="card divide-y divide-slate-100">
+                        ${[
+                            { user: 'John Doe', action: 'CREATE', desc: 'Menambahkan temuan baru TM-125', time: '10:45', type: 'create' },
+                            { user: 'Jane Smith', action: 'UPDATE', desc: 'Mengupdate status temuan TM-120', time: '10:30', type: 'update' },
+                            { user: 'Ahmad Rizki', action: 'UPLOAD', desc: 'Mengupload eviden untuk TM-118', time: '10:15', type: 'upload' },
+                            { user: 'Siti Rahma', action: 'APPROVE', desc: 'Menyetujui tindak lanjut TM-115', time: '09:55', type: 'approve' },
+                            { user: 'Admin', action: 'LOGIN', desc: 'Login ke sistem', time: '09:00', type: 'login' }
+                        ].map(log => `
+                            <div class="p-5 hover:bg-slate-50 transition-colors">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-xl ${log.type === 'create' ? 'bg-emerald-100' : log.type === 'update' ? 'bg-blue-100' : log.type === 'upload' ? 'bg-amber-100' : log.type === 'approve' ? 'bg-green-100' : 'bg-slate-100'} flex items-center justify-center">
+                                        <i class="fas ${log.type === 'create' ? 'fa-plus text-emerald-600' : log.type === 'update' ? 'fa-edit text-blue-600' : log.type === 'upload' ? 'fa-upload text-amber-600' : log.type === 'approve' ? 'fa-check text-green-700' : 'fa-sign-in-alt text-slate-600'}"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm"><span class="font-semibold text-slate-800">${log.user}</span> <span class="text-slate-600">${log.desc}</span></p>
+                                        <p class="text-xs text-slate-400 mt-0.5">Hari ini, ${log.time}</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 text-xs font-semibold rounded-lg ${log.type === 'create' ? 'bg-emerald-100 text-emerald-700' : log.type === 'update' ? 'bg-blue-100 text-blue-700' : log.type === 'upload' ? 'bg-amber-100 text-amber-700' : log.type === 'approve' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'}">${log.action}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getSyncHTML() {
+            return `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-lg font-bold text-slate-800 mb-6">Status Koneksi</h3>
+                        <div class="flex items-center gap-3 p-4 bg-emerald-50 rounded-xl mb-6">
+                            <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                            <span class="text-emerald-700 font-semibold">Terhubung ke SIMPEG</span>
+                        </div>
+                        <div class="space-y-4 text-sm">
+                            <div class="flex justify-between py-3 border-b border-slate-100">
+                                <span class="text-slate-500">Last Sync</span>
+                                <span class="font-semibold text-slate-800">03 Apr 2024, 08:00</span>
+                            </div>
+                            <div class="flex justify-between py-3 border-b border-slate-100">
+                                <span class="text-slate-500">Next Scheduled</span>
+                                <span class="font-semibold text-slate-800">04 Apr 2024, 08:00</span>
+                            </div>
+                            <div class="flex justify-between py-3">
+                                <span class="text-slate-500">Total Synced</span>
+                                <span class="font-semibold text-slate-800">1,245 records</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-6">
+                        <h3 class="text-lg font-bold text-slate-800 mb-6">Aksi Sinkronisasi</h3>
+                        <div class="space-y-3">
+                            <button class="w-full p-4 gradient-primary text-white rounded-xl text-left flex items-center justify-between hover:shadow-lg hover:shadow-green-700/30 transition-all">
+                                <div>
+                                    <p class="font-semibold">Sync Sekarang</p>
+                                    <p class="text-sm text-white/70">Tarik data terbaru dari SIMPEG</p>
+                                </div>
+                                <i class="fas fa-sync-alt text-xl"></i>
+                            </button>
+                            <button class="w-full p-4 bg-slate-100 text-slate-700 rounded-xl text-left flex items-center justify-between hover:bg-slate-200 transition-colors">
+                                <div>
+                                    <p class="font-semibold">Sync Profil User</p>
+                                    <p class="text-sm text-slate-500">Update nama, jabatan, unit</p>
+                                </div>
+                                <i class="fas fa-user-sync text-xl text-slate-400"></i>
+                            </button>
+                            <button class="w-full p-4 bg-slate-100 text-slate-700 rounded-xl text-left flex items-center justify-between hover:bg-slate-200 transition-colors">
+                                <div>
+                                    <p class="font-semibold">Sync Satker Mapping</p>
+                                    <p class="text-sm text-slate-500">Update kode unit kerja</p>
+                                </div>
+                                <i class="fas fa-sitemap text-xl text-slate-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getConfigHTML() {
+            return `
+                <div class="card divide-y divide-slate-100">
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-slate-800 mb-6">Notifikasi</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                                <div>
+                                    <p class="font-semibold text-slate-800">Email Notification</p>
+                                    <p class="text-sm text-slate-500">Kirim notifikasi via email</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-300 peer-checked:bg-green-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                                <div>
+                                    <p class="font-semibold text-slate-800">WhatsApp Notification</p>
+                                    <p class="text-sm text-slate-500">Kirim notifikasi via WhatsApp</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-300 peer-checked:bg-green-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-slate-800 mb-6">Upload Settings</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Max File Size (MB)</label>
+                                <input type="number" value="10" class="input-field w-full px-4 py-3 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Allowed Extensions</label>
+                                <input type="text" value="pdf,jpg,png" class="input-field w-full px-4 py-3 text-sm">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <button class="btn-primary px-6 py-3 text-sm font-semibold text-white rounded-xl">Simpan Pengaturan</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getLHPHTML() {
+            return `
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="relative">
+                            <input type="text" placeholder="Cari LHP..." class="input-field pl-11 pr-4 py-2.5 w-80 text-sm">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        </div>
+                        <button onclick="openModal('modalLHP')" class="btn-primary px-5 py-2.5 text-sm font-semibold text-white rounded-xl flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Input LHP Baru
+                        </button>
+                    </div>
+                    
+                    <div class="card overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">No. LHP</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Judul</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Tanggal</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Jenis</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Temuan</th>
+                                    <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                ${[
+                                    { no: 'LHP/001/2024', title: 'Audit Keuangan Tahunan 2023', date: '15 Jan 2024', type: 'Internal', count: 8 },
+                                    { no: 'LHP/002/2024', title: 'Audit Operasional Q1', date: '20 Feb 2024', type: 'Internal', count: 5 },
+                                    { no: 'LHP/003/2024', title: 'Audit Khusus Pengadaan', date: '10 Mar 2024', type: 'Khusus', count: 3 }
+                                ].map(lhp => `
+                                    <tr class="table-row transition-colors">
+                                        <td class="px-6 py-4 font-bold text-green-700">${lhp.no}</td>
+                                        <td class="px-6 py-4 font-medium text-slate-800">${lhp.title}</td>
+                                        <td class="px-6 py-4 text-slate-600 text-sm">${lhp.date}</td>
+                                        <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">${lhp.type}</span></td>
+                                        <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">${lhp.count} temuan</span></td>
+                                        <td class="px-6 py-4 text-center">
+                                            <button class="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-green-700"><i class="fas fa-eye"></i></button>
+                                            <button class="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-green-700"><i class="fas fa-edit"></i></button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getTemuanHTML() {
+            return `
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari temuan..." class="input-field pl-11 pr-4 py-2.5 w-80 text-sm">
+                                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            </div>
+                            <select class="input-field px-4 py-2.5 text-sm">
+                                <option>Semua Risiko</option>
+                                <option>🔴 Tinggi</option>
+                                <option>🟡 Sedang</option>
+                                <option>🟢 Rendah</option>
+                            </select>
+                            <select class="input-field px-4 py-2.5 text-sm">
+                                <option>Semua Status</option>
+                                <option>Belum TL</option>
+                                <option>Dalam Proses</option>
+                                <option>Selesai</option>
+                            </select>
+                        </div>
+                        <button onclick="openModal('modalTemuan')" class="btn-primary px-5 py-2.5 text-sm font-semibold text-white rounded-xl flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Input Temuan
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        ${[
+                            { id: 'TM-001', title: 'Perbedaan pencatatan aset dengan fisik', risk: 'tinggi', status: 'proses', unit: 'Fakultas Teknik', value: '25.000.000' },
+                            { id: 'TM-002', title: 'SOP pengadaan tidak diikuti', risk: 'sedang', status: 'belum', unit: 'Rektorat', value: '0' },
+                            { id: 'TM-003', title: 'Dokumentasi tidak lengkap', risk: 'rendah', status: 'selesai', unit: 'LPPM', value: '0' }
+                        ].map(t => `
+                            <div class="card p-6 cursor-pointer" onclick="openModal('modalTemuan')">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-xl ${t.risk === 'tinggi' ? 'bg-rose-100' : t.risk === 'sedang' ? 'bg-amber-100' : 'bg-emerald-100'} flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-exclamation-triangle ${t.risk === 'tinggi' ? 'text-rose-600' : t.risk === 'sedang' ? 'text-amber-600' : 'text-emerald-600'}"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="text-sm font-bold text-green-700">${t.id}</span>
+                                            <span class="px-2 py-0.5 rounded-md text-xs font-bold ${t.risk === 'tinggi' ? 'bg-rose-100 text-rose-700' : t.risk === 'sedang' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">${t.risk.toUpperCase()}</span>
+                                            <span class="px-2 py-0.5 rounded-md text-xs font-semibold ${t.status === 'selesai' ? 'bg-emerald-100 text-emerald-700' : t.status === 'proses' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}">${t.status === 'selesai' ? 'Selesai' : t.status === 'proses' ? 'Dalam Proses' : 'Belum TL'}</span>
+                                        </div>
+                                        <h3 class="font-bold text-slate-800 mb-2">${t.title}</h3>
+                                        <div class="flex items-center gap-4 text-sm text-slate-500">
+                                            <span><i class="fas fa-building mr-1"></i>${t.unit}</span>
+                                            ${t.value !== '0' ? `<span><i class="fas fa-money-bill mr-1"></i>Rp ${t.value}</span>` : ''}
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-slate-300"></i>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getPenugasanHTML() {
+            return `
+                <div class="card p-8">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Pilih Temuan</label>
+                            <select class="input-field w-full px-4 py-3 text-sm">
+                                <option>TM-001 - Perbedaan pencatatan aset</option>
+                                <option>TM-002 - SOP pengadaan tidak diikuti</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Unit Kerja</label>
+                            <select class="input-field w-full px-4 py-3 text-sm">
+                                <option>Fakultas Teknik</option>
+                                <option>Fakultas Ekonomi</option>
+                                <option>Rektorat</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">PIC (dari SIMPEG)</label>
+                            <div class="flex gap-2">
+                                <input type="text" placeholder="Cari NIP..." class="input-field flex-1 px-4 py-3 text-sm">
+                                <button class="w-12 h-12 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center transition-colors">
+                                    <i class="fas fa-search text-slate-500"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Deadline</label>
+                            <input type="date" class="input-field w-full px-4 py-3 text-sm">
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <button class="btn-primary px-8 py-3 text-sm font-semibold text-white rounded-xl">
+                            <i class="fas fa-paper-plane mr-2"></i>Publish & Kirim Notifikasi
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getLaporanHTML() {
+            return `
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="card p-6">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-14 h-14 rounded-xl bg-rose-100 flex items-center justify-center">
+                                    <i class="fas fa-file-pdf text-2xl text-rose-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-800">Export PDF</h3>
+                                    <p class="text-sm text-slate-500">Laporan resmi dengan format</p>
+                                </div>
+                            </div>
+                            <button class="w-full py-3 gradient-rose text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-rose-500/30 transition-all">
+                                <i class="fas fa-download mr-2"></i>Download PDF
+                            </button>
+                        </div>
+                        <div class="card p-6">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-14 h-14 rounded-xl bg-emerald-100 flex items-center justify-center">
+                                    <i class="fas fa-file-excel text-2xl text-emerald-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-800">Export Excel</h3>
+                                    <p class="text-sm text-slate-500">Raw data untuk analisis</p>
+                                </div>
+                            </div>
+                            <button class="w-full py-3 gradient-emerald text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/30 transition-all">
+                                <i class="fas fa-download mr-2"></i>Download Excel
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-6">
+                        <h3 class="font-bold text-slate-800 mb-6">Filter Laporan</h3>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Periode Mulai</label>
+                                <input type="date" class="input-field w-full px-4 py-3 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Periode Akhir</label>
+                                <input type="date" class="input-field w-full px-4 py-3 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Jenis Audit</label>
+                                <select class="input-field w-full px-4 py-3 text-sm">
+                                    <option>Semua</option>
+                                    <option>Internal</option>
+                                    <option>Eksternal</option>
+                                    <option>Khusus</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getEvidenHTML() {
+            return `
+                <div class="card p-8">
+                    <div class="upload-zone rounded-2xl p-16 text-center cursor-pointer" onclick="openModal('modalEviden')">
+                        <div class="w-20 h-20 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-700/30">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Drag & drop files here</h3>
+                        <p class="text-slate-500 mb-6">atau klik untuk memilih file</p>
+                        <button class="btn-primary px-8 py-3 text-sm font-semibold text-white rounded-xl">
+                            Pilih File
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getRiwayatHTML() {
+            return `
+                <div class="card divide-y divide-slate-100">
+                    ${[
+                        { id: 'TM-010', title: 'Update dokumentasi inventaris', date: '28 Mar 2024' },
+                        { id: 'TM-008', title: 'Perbaikan SOP pencatatan', date: '20 Mar 2024' },
+                        { id: 'TM-005', title: 'Rekonsiliasi data aset', date: '15 Mar 2024' }
+                    ].map(item => `
+                        <div class="p-6 hover:bg-slate-50 transition-colors cursor-pointer">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-sm font-bold text-green-700">${item.id}</span>
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">Selesai</span>
+                                    </div>
+                                    <p class="font-semibold text-slate-800">${item.title}</p>
+                                    <p class="text-sm text-slate-500">Diselesaikan: ${item.date}</p>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                                    <i class="fas fa-check-circle text-emerald-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function getReviewHTML() {
+            return `
+                <div class="space-y-4">
+                    ${[
+                        { id: 'TM-015', title: 'Bukti perbaikan sistem', pic: 'Ahmad Rizki', unit: 'Fakultas Teknik', submitted: '02 Apr 2024' },
+                        { id: 'TM-012', title: 'Dokumentasi SOP baru', pic: 'Budi Santoso', unit: 'Rektorat', submitted: '01 Apr 2024' }
+                    ].map(item => `
+                        <div class="card p-6 cursor-pointer" onclick="openModal('modalVerifikasi')">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                                    <i class="fas fa-file-alt text-blue-600 text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-sm font-bold text-green-700">${item.id}</span>
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 status-badge">Menunggu Review</span>
+                                    </div>
+                                    <p class="font-semibold text-slate-800">${item.title}</p>
+                                    <p class="text-sm text-slate-500">${item.pic} • ${item.unit} • ${item.submitted}</p>
+                                </div>
+                                <button class="btn-primary px-5 py-2 text-sm font-semibold text-white rounded-xl">Review</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function getRiwayatVerifHTML() {
+            return `
+                <div class="card divide-y divide-slate-100">
+                    ${[
+                        { id: 'TM-010', title: 'Update dokumentasi', result: 'approved', date: '28 Mar 2024' },
+                        { id: 'TM-008', title: 'Perbaikan format laporan', result: 'rejected', date: '25 Mar 2024' },
+                        { id: 'TM-005', title: 'Bukti rekonsiliasi', result: 'approved', date: '20 Mar 2024' }
+                    ].map(item => `
+                        <div class="p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-sm font-bold text-green-700">${item.id}</span>
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${item.result === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${item.result === 'approved' ? 'Approved' : 'Revisi'}</span>
+                                    </div>
+                                    <p class="font-semibold text-slate-800">${item.title}</p>
+                                    <p class="text-sm text-slate-500">${item.date}</p>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl ${item.result === 'approved' ? 'bg-emerald-100' : 'bg-rose-100'} flex items-center justify-center">
+                                    <i class="fas ${item.result === 'approved' ? 'fa-check-circle text-emerald-600' : 'fa-times-circle text-rose-600'} text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function getApprovalHTML() {
+            return `
+                <div class="space-y-4">
+                    ${[
+                        { id: 'TM-015', title: 'Perbaikan sistem pencatatan keuangan', pic: 'Ahmad Rizki', risk: 'tinggi' },
+                        { id: 'TM-012', title: 'Update SOP pengadaan barang', pic: 'Budi Santoso', risk: 'sedang' }
+                    ].map(item => `
+                        <div class="card p-6">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 rounded-xl ${item.risk === 'tinggi' ? 'bg-rose-100' : 'bg-amber-100'} flex items-center justify-center">
+                                    <i class="fas fa-gavel ${item.risk === 'tinggi' ? 'text-rose-600' : 'text-amber-600'} text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-sm font-bold text-green-700">${item.id}</span>
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">Menunggu Approval</span>
+                                    </div>
+                                    <p class="font-bold text-slate-800 mb-1">${item.title}</p>
+                                    <p class="text-sm text-slate-500">PIC: ${item.pic}</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="openModal('modalVerifikasi')" class="px-5 py-2 gradient-emerald text-white rounded-xl text-sm font-semibold">
+                                        <i class="fas fa-check mr-1"></i>Approve
+                                    </button>
+                                    <button class="px-5 py-2 gradient-rose text-white rounded-xl text-sm font-semibold">
+                                        <i class="fas fa-times mr-1"></i>Reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function getSearchHTML() {
+            return `
+                <div class="space-y-6">
+                    <div class="card p-8">
+                        <div class="relative mb-6">
+                            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-xl"></i>
+                            <input type="text" placeholder="Ketik kata kunci temuan..." class="input-field w-full pl-14 pr-6 py-4 text-lg">
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="px-4 py-2 bg-slate-100 rounded-full text-sm text-slate-600 cursor-pointer hover:bg-green-100 hover:text-green-700 transition-colors">Tahun: 2024</span>
+                            <span class="px-4 py-2 bg-slate-100 rounded-full text-sm text-slate-600 cursor-pointer hover:bg-green-100 hover:text-green-700 transition-colors">Status: Semua</span>
+                            <span class="px-4 py-2 bg-slate-100 rounded-full text-sm text-slate-600 cursor-pointer hover:bg-green-100 hover:text-green-700 transition-colors">Risiko: Semua</span>
+                            <span class="px-4 py-2 bg-slate-100 rounded-full text-sm text-slate-600 cursor-pointer hover:bg-green-100 hover:text-green-700 transition-colors">Unit: Semua</span>
+                        </div>
+                    </div>
+                    <div class="text-center py-16 text-slate-400">
+                        <i class="fas fa-search text-6xl mb-4"></i>
+                        <p class="text-lg">Masukkan kata kunci untuk mencari temuan</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+            showToast();
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        function initCharts() {
+            // Trend Chart
+            const trendCtx = document.getElementById('trendChart');
+            if (trendCtx) {
+                new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                        datasets: [
+                            { label: 'Selesai', data: [45, 58, 62, 71, 68, 72], borderColor: '#006838', backgroundColor: 'rgba(0, 104, 56, 0.1)', tension: 0.4, fill: true },
+                            { label: 'Dalam Proses', data: [30, 35, 40, 38, 42, 45], borderColor: '#f4b41a', backgroundColor: 'rgba(244, 180, 26, 0.1)', tension: 0.4, fill: true }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+                });
+            }
+
+            // Satker Chart
+            const satkerCtx = document.getElementById('satkerChart');
+            if (satkerCtx) {
+                new Chart(satkerCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['F.Teknik', 'F.Ekonomi', 'Rektorat', 'LPPM', 'UPT'],
+                        datasets: [{ label: 'Progress', data: [85, 72, 60, 45, 80], backgroundColor: ['#006838', '#00a050', '#14b8a6', '#f4b41a', '#059669'], borderRadius: 8 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+                });
+            }
+
+            // Status Chart
+            const statusCtx = document.getElementById('statusChart');
+            if (statusCtx) {
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Selesai', 'Dalam Proses', 'Belum TL', 'Overdue'],
+                        datasets: [{ data: [67, 33, 12, 12], backgroundColor: ['#059669', '#006838', '#94a3b8', '#f43f5e'], borderWidth: 0 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            changeRole('superadmin');
+        });
+    </script>
+</body>
+</html>
