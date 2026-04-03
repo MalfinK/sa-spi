@@ -434,9 +434,12 @@
           <option value="ketua">👔 Ketua SPI</option>
           <option value="pimpinan">🏛️ Pimpinan</option>
         </select>
-        
+
         <!-- Logout Button -->
-        <button onclick="logout()" class="w-full mt-3 px-4 py-2.5 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors">
+        <button
+          onclick="logout()"
+          class="w-full mt-3 px-4 py-2.5 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+        >
           <i class="fas fa-sign-out-alt"></i>
           Logout
         </button>
@@ -2590,28 +2593,28 @@
       document.addEventListener("DOMContentLoaded", () => {
         // Check for role from URL parameter or localStorage
         const urlParams = new URLSearchParams(window.location.search);
-        const roleParam = urlParams.get('role');
-        const storedRole = localStorage.getItem('simtl_role');
-        
+        const roleParam = urlParams.get("role");
+        const storedRole = localStorage.getItem("simtl_role");
+
         // Use URL param first, then localStorage, then default to superadmin
-        const initialRole = roleParam || storedRole || 'superadmin';
-        
+        const initialRole = roleParam || storedRole || "superadmin";
+
         // Update the role selector
-        const roleSelector = document.getElementById('roleSelector');
+        const roleSelector = document.getElementById("roleSelector");
         if (roleSelector) {
           roleSelector.value = initialRole;
         }
-        
+
         changeRole(initialRole);
       });
-      
+
       // Logout function
       function logout() {
         // Clear stored role
-        localStorage.removeItem('simtl_role');
-        
+        localStorage.removeItem("simtl_role");
+
         // Redirect to login page
-        window.location.href = 'login.html';
+        window.location.href = "login.html";
       }
     </script>
   </body>
