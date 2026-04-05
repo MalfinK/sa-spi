@@ -235,6 +235,24 @@
         transform: scale(1) translateY(0);
       }
 
+      /* Satker Tab Styles */
+      .satker-tab {
+        transition: all 0.3s ease;
+      }
+      .satker-tab.active {
+        color: #006838;
+      }
+      .satker-tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #006838, #f4b41a);
+        border-radius: 2px 2px 0 0;
+      }
+
       /* Input */
       .input-field {
         border: 2px solid #e2e8f0;
@@ -1013,15 +1031,30 @@
           </div>
           <div>
             <label class="block text-sm font-semibold text-slate-700 mb-2"
-              >Role</label
+              >Role <span class="text-slate-400 font-normal">(bisa pilih lebih dari satu)</span></label
             >
-            <select class="input-field w-full px-4 py-3 text-sm">
-              <option>Admin SPI / Auditor</option>
-              <option>Verifikator</option>
-              <option>Ketua SPI</option>
-              <option>User PIC</option>
-              <option>Pimpinan</option>
-            </select>
+            <div class="space-y-2 p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-white cursor-pointer transition-colors">
+                <input type="checkbox" class="w-5 h-5 text-green-600 rounded border-slate-300 focus:ring-green-500">
+                <span class="text-sm text-slate-700">Admin SPI / Auditor</span>
+              </label>
+              <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-white cursor-pointer transition-colors">
+                <input type="checkbox" class="w-5 h-5 text-green-600 rounded border-slate-300 focus:ring-green-500">
+                <span class="text-sm text-slate-700">Verifikator</span>
+              </label>
+              <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-white cursor-pointer transition-colors">
+                <input type="checkbox" class="w-5 h-5 text-green-600 rounded border-slate-300 focus:ring-green-500">
+                <span class="text-sm text-slate-700">Ketua SPI</span>
+              </label>
+              <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-white cursor-pointer transition-colors">
+                <input type="checkbox" class="w-5 h-5 text-green-600 rounded border-slate-300 focus:ring-green-500">
+                <span class="text-sm text-slate-700">User PIC</span>
+              </label>
+              <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-white cursor-pointer transition-colors">
+                <input type="checkbox" class="w-5 h-5 text-green-600 rounded border-slate-300 focus:ring-green-500">
+                <span class="text-sm text-slate-700">Pimpinan</span>
+              </label>
+            </div>
           </div>
         </div>
         <div class="p-6 bg-slate-50 rounded-b-3xl flex justify-end gap-3">
@@ -1037,6 +1070,367 @@
           >
             Simpan
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Satker Detail dengan Tabs -->
+    <div
+      id="modalSatkerDetail"
+      class="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    >
+      <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between p-6 border-b border-slate-100 flex-shrink-0">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
+              <i class="fas fa-building text-white"></i>
+            </div>
+            <div>
+              <h3 id="satkerDetailTitle" class="text-lg font-bold text-slate-800">Detail Satker</h3>
+              <p class="text-sm text-slate-500">Kelola PIC dan Temuan</p>
+            </div>
+          </div>
+          <button onclick="closeModal('modalSatkerDetail')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors">
+            <i class="fas fa-times text-slate-400"></i>
+          </button>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="flex border-b border-slate-200 px-6 flex-shrink-0">
+          <button onclick="switchSatkerTab('pic')" id="tabPIC" class="satker-tab active px-6 py-4 text-sm font-semibold text-slate-600 relative">
+            <i class="fas fa-users mr-2"></i>Daftar PIC
+            <span id="tabPICCount" class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">5</span>
+          </button>
+          <button onclick="switchSatkerTab('temuan')" id="tabTemuan" class="satker-tab px-6 py-4 text-sm font-semibold text-slate-600 relative">
+            <i class="fas fa-file-alt mr-2"></i>Daftar Temuan
+            <span id="tabTemuanCount" class="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">28</span>
+          </button>
+        </div>
+        
+        <!-- Tab Content -->
+        <div class="p-6 overflow-y-auto flex-1">
+          <!-- PIC List -->
+          <div id="satkerPICList">
+            <div class="flex items-center justify-between mb-4">
+              <div class="relative">
+                <input type="text" placeholder="Cari PIC..." class="input-field pl-10 pr-4 py-2.5 w-64 text-sm">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              </div>
+              <button class="btn-primary px-4 py-2 text-sm font-semibold text-white rounded-xl flex items-center gap-2">
+                <i class="fas fa-plus"></i> Tambah PIC
+              </button>
+            </div>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-sm">AR</div>
+                  <div>
+                    <p class="font-semibold text-slate-800">Ahmad Rizki</p>
+                    <p class="text-sm text-slate-500">NIP: 198501012010011001</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">4 Temuan</span>
+                  <button class="p-2 hover:bg-white rounded-lg transition-colors"><i class="fas fa-edit text-slate-400"></i></button>
+                  <button class="p-2 hover:bg-white rounded-lg transition-colors"><i class="fas fa-trash text-rose-400"></i></button>
+                </div>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-full gradient-amber flex items-center justify-center text-white font-bold text-sm">BS</div>
+                  <div>
+                    <p class="font-semibold text-slate-800">Budi Santoso</p>
+                    <p class="text-sm text-slate-500">NIP: 198602052011011002</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">6 Temuan</span>
+                  <button class="p-2 hover:bg-white rounded-lg transition-colors"><i class="fas fa-edit text-slate-400"></i></button>
+                  <button class="p-2 hover:bg-white rounded-lg transition-colors"><i class="fas fa-trash text-rose-400"></i></button>
+                </div>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-full gradient-emerald flex items-center justify-center text-white font-bold text-sm">SW</div>
+                  <div>
+                    <p class="font-semibold text-slate-800">Siti Wulandari</p>
+                    <p class="text-sm text-slate-500">NIP: 199003152012012003</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">8 Temuan</span>
+                  <button class="p-2 hover:bg-white rounded-lg transition-colors"><i class="fas fa-edit text-slate-400"></i></button>
+                  <button class="p-2 hover:bg-white rounded-lg transition-colors"><i class="fas fa-trash text-rose-400"></i></button>
+                </div>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-full gradient-rose flex items-center justify-center text-white font-bold text-sm">DH</div>
+                  <div>
+                    <p class="font-semibold text-slate-800">Dewi Hartati</p>
+                    <p class="text-sm text-slate-500">NIP: 198807202013012004</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">5 Temuan</span>
+                  <button class="p-2 hover:bg-white rounded-lg transition-colors"><i class="fas fa-edit text-slate-400"></i></button>
+                  <button class="p-2 hover:bg-white rounded-lg transition-colors"><i class="fas fa-trash text-rose-400"></i></button>
+                </div>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-full gradient-purple flex items-center justify-center text-white font-bold text-sm">EP</div>
+                  <div>
+                    <p class="font-semibold text-slate-800">Eko Prasetyo</p>
+                    <p class="text-sm text-slate-500">NIP: 199104252014011005</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">5 Temuan</span>
+                  <button class="p-2 hover:bg-white rounded-lg transition-colors"><i class="fas fa-edit text-slate-400"></i></button>
+                  <button class="p-2 hover:bg-white rounded-lg transition-colors"><i class="fas fa-trash text-rose-400"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Temuan List -->
+          <div id="satkerTemuanList" class="hidden">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="relative">
+                  <input type="text" placeholder="Cari temuan..." class="input-field pl-10 pr-4 py-2.5 w-64 text-sm">
+                  <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                </div>
+                <select class="input-field px-3 py-2.5 text-sm">
+                  <option>Semua Status</option>
+                  <option>Belum TL</option>
+                  <option>Proses</option>
+                  <option>Selesai</option>
+                </select>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div class="p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer" onclick="openModal('modalEviden')">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
+                      <i class="fas fa-exclamation-triangle text-rose-600"></i>
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2 mb-0.5">
+                        <span class="text-sm font-bold text-green-700">TM-001</span>
+                        <span class="px-2 py-0.5 text-xs font-semibold bg-rose-100 text-rose-700 rounded-full">TINGGI</span>
+                      </div>
+                      <p class="font-semibold text-slate-800">Perbaikan sistem pencatatan keuangan</p>
+                      <p class="text-sm text-slate-500">PIC: Ahmad Rizki • Deadline: 15 Apr 2024</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="px-3 py-1.5 text-xs font-semibold bg-amber-100 text-amber-700 rounded-full">Proses</span>
+                    <i class="fas fa-chevron-right text-slate-300"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer" onclick="openModal('modalEviden')">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                      <i class="fas fa-exclamation-triangle text-amber-600"></i>
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2 mb-0.5">
+                        <span class="text-sm font-bold text-green-700">TM-002</span>
+                        <span class="px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 rounded-full">SEDANG</span>
+                      </div>
+                      <p class="font-semibold text-slate-800">Update SOP pengadaan barang</p>
+                      <p class="text-sm text-slate-500">PIC: Budi Santoso • Deadline: 20 Apr 2024</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="px-3 py-1.5 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded-full">Selesai</span>
+                    <i class="fas fa-chevron-right text-slate-300"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer" onclick="openModal('modalEviden')">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                      <i class="fas fa-exclamation-triangle text-emerald-600"></i>
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2 mb-0.5">
+                        <span class="text-sm font-bold text-green-700">TM-003</span>
+                        <span class="px-2 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded-full">RENDAH</span>
+                      </div>
+                      <p class="font-semibold text-slate-800">Dokumentasi aset inventaris</p>
+                      <p class="text-sm text-slate-500">PIC: Siti Wulandari • Deadline: 25 Apr 2024</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="px-3 py-1.5 text-xs font-semibold bg-slate-100 text-slate-600 rounded-full">Belum TL</span>
+                    <i class="fas fa-chevron-right text-slate-300"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Approval History -->
+    <div
+      id="modalApprovalHistory"
+      class="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    >
+      <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div class="flex items-center justify-between p-6 border-b border-slate-100">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
+              <i class="fas fa-history text-white"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-slate-800">Detail Temuan & History Approval</h3>
+              <p id="approvalHistoryId" class="text-sm text-slate-500">TM-015</p>
+            </div>
+          </div>
+          <button onclick="closeModal('modalApprovalHistory')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors">
+            <i class="fas fa-times text-slate-400"></i>
+          </button>
+        </div>
+        
+        <div class="p-6 overflow-y-auto max-h-[60vh]">
+          <!-- Temuan Info -->
+          <div class="p-4 bg-gradient-to-r from-green-50 to-amber-50 rounded-xl border border-green-100 mb-6">
+            <h4 class="font-bold text-slate-800 mb-2">Perbaikan sistem pencatatan keuangan</h4>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span class="text-slate-500">PIC:</span>
+                <span class="font-semibold text-slate-700 ml-1">Ahmad Rizki</span>
+              </div>
+              <div>
+                <span class="text-slate-500">Unit:</span>
+                <span class="font-semibold text-slate-700 ml-1">Fakultas Teknik</span>
+              </div>
+              <div>
+                <span class="text-slate-500">Tingkat Risiko:</span>
+                <span class="ml-1 px-2 py-0.5 text-xs font-semibold bg-rose-100 text-rose-700 rounded-full">TINGGI</span>
+              </div>
+              <div>
+                <span class="text-slate-500">Deadline:</span>
+                <span class="font-semibold text-slate-700 ml-1">15 Apr 2024</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Approval Timeline -->
+          <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-stream text-green-600"></i> Riwayat Approval
+          </h4>
+          <div class="space-y-4">
+            <!-- PIC Submit -->
+            <div class="flex gap-4">
+              <div class="flex flex-col items-center">
+                <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <i class="fas fa-upload text-emerald-600"></i>
+                </div>
+                <div class="w-0.5 h-full bg-slate-200 mt-2"></div>
+              </div>
+              <div class="flex-1 pb-6">
+                <div class="flex items-center justify-between mb-1">
+                  <p class="font-semibold text-slate-800">Tindak Lanjut Diupload</p>
+                  <span class="text-xs text-slate-400">10 Apr 2024, 14:30</span>
+                </div>
+                <p class="text-sm text-slate-500 mb-2">PIC mengunggah eviden tindak lanjut</p>
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-white text-xs font-bold">AR</div>
+                  <span class="text-sm font-medium text-slate-700">Ahmad Rizki (PIC)</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Verifikator 1 -->
+            <div class="flex gap-4">
+              <div class="flex flex-col items-center">
+                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <i class="fas fa-check text-green-600"></i>
+                </div>
+                <div class="w-0.5 h-full bg-slate-200 mt-2"></div>
+              </div>
+              <div class="flex-1 pb-6">
+                <div class="flex items-center justify-between mb-1">
+                  <p class="font-semibold text-slate-800">Diverifikasi</p>
+                  <span class="text-xs text-slate-400">11 Apr 2024, 09:15</span>
+                </div>
+                <p class="text-sm text-slate-500 mb-2">Eviden dinyatakan sesuai dan memenuhi kriteria</p>
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full gradient-emerald flex items-center justify-center text-white text-xs font-bold">VR</div>
+                  <span class="text-sm font-medium text-slate-700">Verifikator Tim 1</span>
+                </div>
+                <div class="mt-2 p-3 bg-slate-50 rounded-lg text-sm text-slate-600">
+                  <i class="fas fa-comment text-slate-400 mr-2"></i>
+                  "Dokumen sudah lengkap dan sesuai dengan rekomendasi audit."
+                </div>
+              </div>
+            </div>
+            
+            <!-- Verifikator 2 -->
+            <div class="flex gap-4">
+              <div class="flex flex-col items-center">
+                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <i class="fas fa-check-double text-green-600"></i>
+                </div>
+                <div class="w-0.5 h-full bg-slate-200 mt-2"></div>
+              </div>
+              <div class="flex-1 pb-6">
+                <div class="flex items-center justify-between mb-1">
+                  <p class="font-semibold text-slate-800">Verifikasi Lanjutan</p>
+                  <span class="text-xs text-slate-400">12 Apr 2024, 10:45</span>
+                </div>
+                <p class="text-sm text-slate-500 mb-2">Verifikasi tahap kedua selesai</p>
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full gradient-amber flex items-center justify-center text-white text-xs font-bold">V2</div>
+                  <span class="text-sm font-medium text-slate-700">Verifikator Tim 2</span>
+                </div>
+                <div class="mt-2 p-3 bg-slate-50 rounded-lg text-sm text-slate-600">
+                  <i class="fas fa-comment text-slate-400 mr-2"></i>
+                  "Sudah divalidasi silang dengan data di sistem. OK untuk diajukan ke Ketua SPI."
+                </div>
+              </div>
+            </div>
+            
+            <!-- Menunggu Approval Final -->
+            <div class="flex gap-4">
+              <div class="flex flex-col items-center">
+                <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center animate-pulse">
+                  <i class="fas fa-hourglass-half text-amber-600"></i>
+                </div>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between mb-1">
+                  <p class="font-semibold text-amber-700">Menunggu Approval Final</p>
+                  <span class="px-2 py-1 text-xs font-semibold bg-amber-100 text-amber-700 rounded-full">Pending</span>
+                </div>
+                <p class="text-sm text-slate-500">Menunggu persetujuan dari Ketua SPI</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="p-6 bg-slate-50 rounded-b-3xl flex justify-between items-center">
+          <button onclick="closeModal('modalApprovalHistory')" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+            Tutup
+          </button>
+          <div class="flex gap-3">
+            <button class="px-5 py-2.5 gradient-rose text-white rounded-xl text-sm font-semibold">
+              <i class="fas fa-times mr-1"></i>Reject
+            </button>
+            <button onclick="closeModal('modalApprovalHistory')" class="px-5 py-2.5 gradient-emerald text-white rounded-xl text-sm font-semibold">
+              <i class="fas fa-check mr-1"></i>Approve
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1513,7 +1907,34 @@
                     <!-- Task List -->
                     <div class="card overflow-hidden">
                         <div class="p-6 border-b border-slate-100">
-                            <h3 class="text-lg font-bold text-slate-800">Tugas yang Perlu Ditindaklanjuti</h3>
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-slate-800">Tugas yang Perlu Ditindaklanjuti</h3>
+                            </div>
+                            <!-- Search and Filter -->
+                            <div class="flex flex-wrap items-center gap-3 mt-4">
+                                <div class="relative flex-1 min-w-64">
+                                    <input type="text" placeholder="Cari temuan..." class="input-field pl-10 pr-4 py-2.5 w-full text-sm">
+                                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                </div>
+                                <select class="input-field px-4 py-2.5 text-sm" onchange="filterByStatus(this.value)">
+                                    <option value="">Semua Status</option>
+                                    <option value="belum">Belum TL</option>
+                                    <option value="proses">Dalam Proses</option>
+                                    <option value="revisi">Perlu Revisi</option>
+                                    <option value="verifikasi">Dalam Verifikasi</option>
+                                    <option value="selesai">Selesai</option>
+                                </select>
+                                <select class="input-field px-4 py-2.5 text-sm" onchange="filterByYear(this.value)">
+                                    <option value="">Semua Tahun</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2021">2021</option>
+                                </select>
+                                <button class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
+                                    <i class="fas fa-filter"></i> Reset Filter
+                                </button>
+                            </div>
                         </div>
                         <div class="divide-y divide-slate-100">
                             ${[
@@ -1523,6 +1944,7 @@
                                 risk: "tinggi",
                                 deadline: "15 Apr 2024",
                                 status: "belum",
+                                year: "2024",
                               },
                               {
                                 id: "TM-002",
@@ -1530,6 +1952,7 @@
                                 risk: "sedang",
                                 deadline: "20 Apr 2024",
                                 status: "revisi",
+                                year: "2024",
                               },
                               {
                                 id: "TM-003",
@@ -1537,11 +1960,28 @@
                                 risk: "rendah",
                                 deadline: "25 Apr 2024",
                                 status: "belum",
+                                year: "2024",
+                              },
+                              {
+                                id: "TM-045",
+                                title: "Evaluasi kinerja pegawai",
+                                risk: "sedang",
+                                deadline: "10 Mei 2024",
+                                status: "proses",
+                                year: "2024",
+                              },
+                              {
+                                id: "TM-089",
+                                title: "Perbaikan sistem absensi",
+                                risk: "tinggi",
+                                deadline: "30 Mei 2024",
+                                status: "verifikasi",
+                                year: "2024",
                               },
                             ]
                               .map(
                                 (task) => `
-                                <div class="p-6 hover:bg-slate-50 transition-colors cursor-pointer" onclick="openModal('modalEviden')">
+                                <div class="p-6 hover:bg-slate-50 transition-colors cursor-pointer task-item" data-status="${task.status}" data-year="${task.year}" onclick="openModal('modalEviden')">
                                     <div class="flex items-center gap-4">
                                         <div class="w-12 h-12 rounded-xl ${task.risk === "tinggi" ? "bg-rose-100" : task.risk === "sedang" ? "bg-amber-100" : "bg-emerald-100"} flex items-center justify-center flex-shrink-0">
                                             <i class="fas fa-exclamation-triangle ${task.risk === "tinggi" ? "text-rose-600" : task.risk === "sedang" ? "text-amber-600" : "text-emerald-600"}"></i>
@@ -1550,13 +1990,22 @@
                                             <div class="flex items-center gap-2 mb-1">
                                                 <span class="text-sm font-bold text-green-700">${task.id}</span>
                                                 <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${task.risk === "tinggi" ? "bg-rose-100 text-rose-700" : task.risk === "sedang" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}">${task.risk.toUpperCase()}</span>
+                                                <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500">${task.year}</span>
                                             </div>
                                             <p class="font-semibold text-slate-800 truncate">${task.title}</p>
                                             <p class="text-sm text-slate-500">Deadline: ${task.deadline}</p>
                                         </div>
                                         <div class="flex items-center gap-3">
-                                            <span class="px-3 py-1.5 rounded-full text-xs font-semibold ${task.status === "revisi" ? "bg-amber-100 text-amber-700 status-badge" : "bg-slate-100 text-slate-600"}">
-                                                ${task.status === "revisi" ? "Perlu Revisi" : "Belum TL"}
+                                            <span class="px-3 py-1.5 rounded-full text-xs font-semibold ${
+                                              task.status === "revisi" ? "bg-amber-100 text-amber-700 status-badge" : 
+                                              task.status === "proses" ? "bg-blue-100 text-blue-700" :
+                                              task.status === "verifikasi" ? "bg-green-100 text-green-700" :
+                                              "bg-slate-100 text-slate-600"
+                                            }">
+                                                ${task.status === "revisi" ? "Perlu Revisi" : 
+                                                  task.status === "proses" ? "Dalam Proses" :
+                                                  task.status === "verifikasi" ? "Verifikasi" :
+                                                  "Belum TL"}
                                             </span>
                                             <i class="fas fa-chevron-right text-slate-300"></i>
                                         </div>
@@ -1781,7 +2230,7 @@
                         ]
                           .map(
                             (s) => `
-                            <div class="feature-card card p-6">
+                            <div class="feature-card card p-6 cursor-pointer" onclick="openSatkerDetail('${s.name}', ${s.pic}, ${s.temuan})">
                                 <div class="flex items-start justify-between mb-4">
                                     <div class="feature-icon w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
                                         <i class="fas fa-building text-white text-xl"></i>
@@ -2406,49 +2855,99 @@
 
       function getApprovalHTML() {
         return `
-                <div class="space-y-4">
+                <div class="space-y-6">
+                    <!-- Filter Bar -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari temuan..." class="input-field pl-10 pr-4 py-2.5 w-72 text-sm">
+                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            </div>
+                            <select class="input-field px-4 py-2.5 text-sm">
+                                <option>Semua Risiko</option>
+                                <option>Tinggi</option>
+                                <option>Sedang</option>
+                                <option>Rendah</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-slate-500">
+                            <i class="fas fa-info-circle text-green-600"></i>
+                            Klik temuan untuk melihat history approval
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
                     ${[
                       {
                         id: "TM-015",
                         title: "Perbaikan sistem pencatatan keuangan",
                         pic: "Ahmad Rizki",
+                        unit: "Fakultas Teknik",
                         risk: "tinggi",
+                        verifikator: "Tim Verifikasi 1 & 2",
                       },
                       {
                         id: "TM-012",
                         title: "Update SOP pengadaan barang",
                         pic: "Budi Santoso",
+                        unit: "Fakultas Ekonomi",
                         risk: "sedang",
+                        verifikator: "Tim Verifikasi 1",
+                      },
+                      {
+                        id: "TM-008",
+                        title: "Perbaikan sistem absensi online",
+                        pic: "Siti Wulandari",
+                        unit: "Rektorat",
+                        risk: "tinggi",
+                        verifikator: "Tim Verifikasi 2",
                       },
                     ]
                       .map(
                         (item) => `
-                        <div class="card p-6">
+                        <div class="card p-6 hover:shadow-lg transition-all cursor-pointer" onclick="openApprovalHistory('${item.id}', '${item.title}')">
                             <div class="flex items-start gap-4">
-                                <div class="w-12 h-12 rounded-xl ${item.risk === "tinggi" ? "bg-rose-100" : "bg-amber-100"} flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-xl ${item.risk === "tinggi" ? "bg-rose-100" : "bg-amber-100"} flex items-center justify-center flex-shrink-0">
                                     <i class="fas fa-gavel ${item.risk === "tinggi" ? "text-rose-600" : "text-amber-600"} text-xl"></i>
                                 </div>
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-1">
                                         <span class="text-sm font-bold text-green-700">${item.id}</span>
                                         <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">Menunggu Approval</span>
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${item.risk === "tinggi" ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700"}">${item.risk.toUpperCase()}</span>
                                     </div>
-                                    <p class="font-bold text-slate-800 mb-1">${item.title}</p>
-                                    <p class="text-sm text-slate-500">PIC: ${item.pic}</p>
+                                    <p class="font-bold text-slate-800 mb-2">${item.title}</p>
+                                    <div class="grid grid-cols-2 gap-2 text-sm text-slate-500">
+                                        <p><i class="fas fa-user mr-1"></i>PIC: ${item.pic}</p>
+                                        <p><i class="fas fa-building mr-1"></i>Unit: ${item.unit}</p>
+                                    </div>
+                                    <!-- Verifikator Info -->
+                                    <div class="mt-3 p-3 bg-green-50 rounded-lg border border-green-100">
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check-circle text-green-600"></i>
+                                            <span class="text-green-700 font-medium">Sudah diverifikasi oleh: ${item.verifikator}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex gap-2">
-                                    <button onclick="openModal('modalVerifikasi')" class="px-5 py-2 gradient-emerald text-white rounded-xl text-sm font-semibold">
-                                        <i class="fas fa-check mr-1"></i>Approve
+                                <div class="flex flex-col gap-2">
+                                    <button onclick="event.stopPropagation(); openApprovalHistory('${item.id}', '${item.title}')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-semibold transition-colors">
+                                        <i class="fas fa-history mr-1"></i>Lihat History
                                     </button>
-                                    <button class="px-5 py-2 gradient-rose text-white rounded-xl text-sm font-semibold">
-                                        <i class="fas fa-times mr-1"></i>Reject
-                                    </button>
+                                    <div class="flex gap-2">
+                                        <button onclick="event.stopPropagation(); closeModal('modalApprovalHistory')" class="flex-1 px-4 py-2 gradient-emerald text-white rounded-xl text-sm font-semibold">
+                                            <i class="fas fa-check mr-1"></i>Approve
+                                        </button>
+                                        <button onclick="event.stopPropagation();" class="flex-1 px-4 py-2 gradient-rose text-white rounded-xl text-sm font-semibold">
+                                            <i class="fas fa-times mr-1"></i>Reject
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     `,
                       )
                       .join("")}
+                </div>
                 </div>
             `;
       }
@@ -2489,6 +2988,63 @@
         const toast = document.getElementById("toast");
         toast.classList.remove("hidden");
         setTimeout(() => toast.classList.add("hidden"), 3000);
+      }
+
+      // Satker Detail Modal Functions
+      function openSatkerDetail(name, picCount, temuanCount) {
+        document.getElementById('satkerDetailTitle').textContent = name;
+        document.getElementById('tabPICCount').textContent = picCount;
+        document.getElementById('tabTemuanCount').textContent = temuanCount;
+        switchSatkerTab('pic');
+        openModal('modalSatkerDetail');
+      }
+
+      function switchSatkerTab(tab) {
+        const tabPIC = document.getElementById('tabPIC');
+        const tabTemuan = document.getElementById('tabTemuan');
+        const picList = document.getElementById('satkerPICList');
+        const temuanList = document.getElementById('satkerTemuanList');
+
+        if (tab === 'pic') {
+          tabPIC.classList.add('active');
+          tabTemuan.classList.remove('active');
+          picList.classList.remove('hidden');
+          temuanList.classList.add('hidden');
+        } else {
+          tabTemuan.classList.add('active');
+          tabPIC.classList.remove('active');
+          temuanList.classList.remove('hidden');
+          picList.classList.add('hidden');
+        }
+      }
+
+      // Approval History Modal
+      function openApprovalHistory(id, title) {
+        document.getElementById('approvalHistoryId').textContent = id;
+        openModal('modalApprovalHistory');
+      }
+
+      // Filter Functions for Tugas Saya
+      function filterByStatus(status) {
+        const items = document.querySelectorAll('.task-item');
+        items.forEach(item => {
+          if (!status || item.dataset.status === status) {
+            item.classList.remove('hidden');
+          } else {
+            item.classList.add('hidden');
+          }
+        });
+      }
+
+      function filterByYear(year) {
+        const items = document.querySelectorAll('.task-item');
+        items.forEach(item => {
+          if (!year || item.dataset.year === year) {
+            item.classList.remove('hidden');
+          } else {
+            item.classList.add('hidden');
+          }
+        });
       }
 
       function initCharts() {

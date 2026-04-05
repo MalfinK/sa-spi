@@ -38,632 +38,350 @@
       }
 
       .login-bg {
-        background: linear-gradient(
-          135deg,
-          #003d20 0%,
-          #006838 50%,
-          #004d28 100%
-        );
+        background: linear-gradient(135deg, #003d20 0%, #006838 50%, #004d28 100%);
         position: relative;
         overflow: hidden;
       }
-
+      
       .login-bg::before {
-        content: "";
+        content: '';
         position: absolute;
         top: -50%;
         right: -50%;
         width: 100%;
         height: 100%;
-        background: radial-gradient(
-          circle,
-          rgba(244, 180, 26, 0.1) 0%,
-          transparent 70%
-        );
+        background: radial-gradient(circle, rgba(244, 180, 26, 0.1) 0%, transparent 70%);
         animation: float 20s infinite ease-in-out;
       }
-
+      
       .login-bg::after {
-        content: "";
+        content: '';
         position: absolute;
         bottom: -50%;
         left: -50%;
         width: 100%;
         height: 100%;
-        background: radial-gradient(
-          circle,
-          rgba(255, 255, 255, 0.05) 0%,
-          transparent 60%
-        );
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
         animation: float 15s infinite ease-in-out reverse;
       }
-
+      
       @keyframes float {
-        0%,
-        100% {
-          transform: translate(0, 0) rotate(0deg);
-        }
-        50% {
-          transform: translate(30px, 30px) rotate(5deg);
-        }
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(30px, 30px) rotate(5deg); }
       }
-
+      
       .card-glass {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(20px);
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
       }
-
+      
       .input-field {
         transition: all 0.3s ease;
         border: 2px solid #e2e8f0;
       }
-
+      
       .input-field:focus {
         border-color: #006838;
         box-shadow: 0 0 0 4px rgba(0, 104, 56, 0.1);
         outline: none;
       }
-
+      
       .btn-login {
         background: linear-gradient(135deg, #006838, #004d28);
         transition: all 0.3s ease;
       }
-
+      
       .btn-login:hover {
         transform: translateY(-2px);
         box-shadow: 0 10px 30px rgba(0, 104, 56, 0.4);
       }
-
-      .role-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 2px solid transparent;
-      }
-
-      .role-card:hover {
-        transform: translateY(-4px);
-        border-color: #f4b41a;
-        box-shadow: 0 10px 30px rgba(244, 180, 26, 0.2);
-      }
-
-      .role-card.selected {
-        border-color: #006838;
-        background: linear-gradient(
-          135deg,
-          rgba(0, 104, 56, 0.05),
-          rgba(244, 180, 26, 0.05)
-        );
-        box-shadow: 0 10px 30px rgba(0, 104, 56, 0.15);
-      }
-
-      .role-card.selected .role-icon {
-        background: linear-gradient(135deg, #006838, #004d28);
-        color: white;
-      }
-
-      .role-card.selected .role-check {
-        opacity: 1;
-        transform: scale(1);
-      }
-
-      .role-check {
-        opacity: 0;
-        transform: scale(0);
+      
+      .btn-sso {
+        background: linear-gradient(135deg, #f4b41a, #d97706);
         transition: all 0.3s ease;
       }
-
+      
+      .btn-sso:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(244, 180, 26, 0.4);
+      }
+      
+      .tab-btn {
+        transition: all 0.3s ease;
+        position: relative;
+      }
+      
+      .tab-btn.active {
+        color: #006838;
+        font-weight: 600;
+      }
+      
+      .tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #006838, #f4b41a);
+        border-radius: 2px;
+      }
+      
       .pattern-dots {
-        background-image: radial-gradient(
-          rgba(255, 255, 255, 0.1) 1px,
-          transparent 1px
-        );
+        background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
         background-size: 30px 30px;
       }
-
+      
       .animate-fade-in {
         animation: fadeIn 0.5s ease-out;
       }
-
+      
       @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
       }
-
-      .step-indicator {
+      
+      .feature-item {
         transition: all 0.3s ease;
       }
-
-      .step-indicator.active {
-        background: #006838;
-        color: white;
-      }
-
-      .step-indicator.completed {
-        background: #f4b41a;
-        color: #004d28;
+      
+      .feature-item:hover {
+        transform: translateX(5px);
       }
     </style>
   </head>
-  <body
-    class="min-h-screen login-bg pattern-dots flex items-center justify-center p-4"
-  >
-    <!-- Login Container -->
-    <div class="w-full max-w-5xl relative z-10">
-      <!-- Logo & Title -->
-      <div class="text-center mb-8 animate-fade-in">
-        <div
-          class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-green-600 to-green-800 shadow-2xl border-4 border-amber-400 mb-4"
-        >
-          <i class="fas fa-clipboard-check text-amber-300 text-3xl"></i>
+  <body class="min-h-screen login-bg pattern-dots flex">
+    <!-- Left Side - Branding -->
+    <div class="hidden lg:flex lg:w-1/2 flex-col justify-center items-center p-12 relative z-10">
+      <div class="max-w-md text-center animate-fade-in">
+        <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-green-600 to-green-800 shadow-2xl border-4 border-amber-400 mb-8">
+          <i class="fas fa-clipboard-check text-amber-300 text-4xl"></i>
         </div>
-        <h1 class="text-3xl font-bold text-white mb-2">
-          SIMTL <span class="text-amber-400">UNJ</span>
-        </h1>
-        <p class="text-green-100/70">Sistem Monitoring Tindak Lanjut Audit</p>
-      </div>
-
-      <!-- Login Card -->
-      <div
-        class="card-glass rounded-3xl overflow-hidden animate-fade-in"
-        style="animation-delay: 0.1s"
-      >
-        <!-- Step Indicators -->
-        <div
-          class="flex items-center justify-center gap-4 p-6 border-b border-slate-100"
-        >
-          <div class="flex items-center gap-2">
-            <div
-              id="step1Indicator"
-              class="step-indicator active w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
-            >
-              1
-            </div>
-            <span class="text-sm font-medium text-slate-600">Pilih Role</span>
-          </div>
-          <div class="w-12 h-0.5 bg-slate-200"></div>
-          <div class="flex items-center gap-2">
-            <div
-              id="step2Indicator"
-              class="step-indicator w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-sm text-slate-500"
-            >
-              2
-            </div>
-            <span class="text-sm font-medium text-slate-400">Login</span>
-          </div>
-        </div>
-
-        <!-- Step 1: Role Selection -->
-        <div id="step1" class="p-8">
-          <h2 class="text-xl font-bold text-slate-800 text-center mb-2">
-            Pilih Role Anda
-          </h2>
-          <p class="text-slate-500 text-center mb-8">
-            Silakan pilih role sesuai dengan hak akses Anda
-          </p>
-
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-            <!-- Superadmin -->
-            <div
-              class="role-card rounded-2xl p-5 bg-white cursor-pointer"
-              onclick="selectRole('superadmin', this)"
-            >
-              <div class="relative">
-                <div
-                  class="role-check absolute -top-2 -right-2 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center"
-                >
-                  <i class="fas fa-check text-white text-xs"></i>
-                </div>
-                <div
-                  class="role-icon w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3 transition-all"
-                >
-                  <i class="fas fa-shield-alt text-2xl text-slate-500"></i>
-                </div>
-                <h3 class="font-bold text-slate-800 text-center">Superadmin</h3>
-                <p class="text-xs text-slate-400 text-center mt-1">
-                  Full system access
-                </p>
-              </div>
-            </div>
-
-            <!-- Admin SPI / Auditor -->
-            <div
-              class="role-card rounded-2xl p-5 bg-white cursor-pointer"
-              onclick="selectRole('auditor', this)"
-            >
-              <div class="relative">
-                <div
-                  class="role-check absolute -top-2 -right-2 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center"
-                >
-                  <i class="fas fa-check text-white text-xs"></i>
-                </div>
-                <div
-                  class="role-icon w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3 transition-all"
-                >
-                  <i class="fas fa-clipboard-list text-2xl text-slate-500"></i>
-                </div>
-                <h3 class="font-bold text-slate-800 text-center">Admin SPI</h3>
-                <p class="text-xs text-slate-400 text-center mt-1">Auditor</p>
-              </div>
-            </div>
-
-            <!-- User PIC -->
-            <div
-              class="role-card rounded-2xl p-5 bg-white cursor-pointer"
-              onclick="selectRole('pic', this)"
-            >
-              <div class="relative">
-                <div
-                  class="role-check absolute -top-2 -right-2 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center"
-                >
-                  <i class="fas fa-check text-white text-xs"></i>
-                </div>
-                <div
-                  class="role-icon w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3 transition-all"
-                >
-                  <i class="fas fa-user text-2xl text-slate-500"></i>
-                </div>
-                <h3 class="font-bold text-slate-800 text-center">User PIC</h3>
-                <p class="text-xs text-slate-400 text-center mt-1">
-                  Penanggung Jawab
-                </p>
-              </div>
-            </div>
-
-            <!-- Verifikator -->
-            <div
-              class="role-card rounded-2xl p-5 bg-white cursor-pointer"
-              onclick="selectRole('verifikator', this)"
-            >
-              <div class="relative">
-                <div
-                  class="role-check absolute -top-2 -right-2 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center"
-                >
-                  <i class="fas fa-check text-white text-xs"></i>
-                </div>
-                <div
-                  class="role-icon w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3 transition-all"
-                >
-                  <i class="fas fa-check-double text-2xl text-slate-500"></i>
-                </div>
-                <h3 class="font-bold text-slate-800 text-center">
-                  Verifikator
-                </h3>
-                <p class="text-xs text-slate-400 text-center mt-1">
-                  Verifikasi Dokumen
-                </p>
-              </div>
-            </div>
-
-            <!-- Ketua SPI -->
-            <div
-              class="role-card rounded-2xl p-5 bg-white cursor-pointer"
-              onclick="selectRole('ketua', this)"
-            >
-              <div class="relative">
-                <div
-                  class="role-check absolute -top-2 -right-2 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center"
-                >
-                  <i class="fas fa-check text-white text-xs"></i>
-                </div>
-                <div
-                  class="role-icon w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3 transition-all"
-                >
-                  <i class="fas fa-user-tie text-2xl text-slate-500"></i>
-                </div>
-                <h3 class="font-bold text-slate-800 text-center">Ketua SPI</h3>
-                <p class="text-xs text-slate-400 text-center mt-1">
-                  Approval Final
-                </p>
-              </div>
-            </div>
-
-            <!-- Pimpinan -->
-            <div
-              class="role-card rounded-2xl p-5 bg-white cursor-pointer"
-              onclick="selectRole('pimpinan', this)"
-            >
-              <div class="relative">
-                <div
-                  class="role-check absolute -top-2 -right-2 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center"
-                >
-                  <i class="fas fa-check text-white text-xs"></i>
-                </div>
-                <div
-                  class="role-icon w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3 transition-all"
-                >
-                  <i class="fas fa-landmark text-2xl text-slate-500"></i>
-                </div>
-                <h3 class="font-bold text-slate-800 text-center">Pimpinan</h3>
-                <p class="text-xs text-slate-400 text-center mt-1">
-                  Executive View
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <button
-            id="btnNext"
-            onclick="goToStep2()"
-            disabled
-            class="w-full py-4 rounded-xl font-semibold text-white btn-login disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
-          >
-            <span id="btnNextText">Pilih role terlebih dahulu</span>
-            <i class="fas fa-arrow-right ml-2"></i>
-          </button>
-        </div>
-
-        <!-- Step 2: Login Form -->
-        <div id="step2" class="p-8 hidden">
-          <button
-            onclick="goToStep1()"
-            class="flex items-center gap-2 text-slate-500 hover:text-slate-700 mb-6 transition-colors"
-          >
-            <i class="fas fa-arrow-left"></i>
-            <span class="text-sm font-medium">Kembali pilih role</span>
-          </button>
-
-          <div
-            class="flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-amber-50 rounded-xl mb-6 border border-green-100"
-          >
-            <div
-              id="selectedRoleIcon"
-              class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center"
-            >
-              <i class="fas fa-shield-alt text-xl text-white"></i>
+        <h1 class="text-4xl font-bold text-white mb-4">SIMTL <span class="text-amber-400">UNJ</span></h1>
+        <p class="text-green-100/80 text-lg mb-8">Sistem Monitoring Tindak Lanjut Hasil Audit</p>
+        
+        <div class="space-y-4 text-left">
+          <div class="feature-item flex items-center gap-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+            <div class="w-10 h-10 rounded-lg bg-amber-400/20 flex items-center justify-center">
+              <i class="fas fa-chart-line text-amber-400"></i>
             </div>
             <div>
-              <p class="text-xs text-slate-500">Login sebagai</p>
-              <p id="selectedRoleName" class="font-bold text-slate-800">
-                Superadmin
+              <p class="text-white font-semibold">Monitoring Real-time</p>
+              <p class="text-green-100/60 text-sm">Pantau progress tindak lanjut secara langsung</p>
+            </div>
+          </div>
+          <div class="feature-item flex items-center gap-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+            <div class="w-10 h-10 rounded-lg bg-amber-400/20 flex items-center justify-center">
+              <i class="fas fa-file-signature text-amber-400"></i>
+            </div>
+            <div>
+              <p class="text-white font-semibold">Multi-Level Approval</p>
+              <p class="text-green-100/60 text-sm">Workflow approval yang terstruktur</p>
+            </div>
+          </div>
+          <div class="feature-item flex items-center gap-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+            <div class="w-10 h-10 rounded-lg bg-amber-400/20 flex items-center justify-center">
+              <i class="fas fa-shield-alt text-amber-400"></i>
+            </div>
+            <div>
+              <p class="text-white font-semibold">Audit Trail Lengkap</p>
+              <p class="text-green-100/60 text-sm">Rekam jejak aktivitas yang komprehensif</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right Side - Login Form -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 relative z-10">
+      <div class="w-full max-w-md">
+        <!-- Mobile Logo -->
+        <div class="lg:hidden text-center mb-8 animate-fade-in">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-600 to-green-800 shadow-2xl border-3 border-amber-400 mb-4">
+            <i class="fas fa-clipboard-check text-amber-300 text-2xl"></i>
+          </div>
+          <h1 class="text-2xl font-bold text-white">SIMTL <span class="text-amber-400">UNJ</span></h1>
+        </div>
+        
+        <!-- Login Card -->
+        <div class="card-glass rounded-3xl overflow-hidden animate-fade-in" style="animation-delay: 0.1s">
+          <div class="p-8">
+            <h2 class="text-2xl font-bold text-slate-800 text-center mb-2">Selamat Datang</h2>
+            <p class="text-slate-500 text-center mb-6">Silakan login untuk melanjutkan</p>
+            
+            <!-- Login Tabs -->
+            <div class="flex border-b border-slate-200 mb-6">
+              <button onclick="switchTab('sso')" id="tabSSO" class="tab-btn active flex-1 py-3 text-center text-slate-600">
+                <i class="fas fa-university mr-2"></i>SSO UNJ
+              </button>
+              <button onclick="switchTab('email')" id="tabEmail" class="tab-btn flex-1 py-3 text-center text-slate-600">
+                <i class="fas fa-envelope mr-2"></i>Email / NIP
+              </button>
+            </div>
+            
+            <!-- SSO Login -->
+            <div id="ssoForm" class="space-y-5">
+              <div class="p-6 bg-gradient-to-br from-green-50 to-amber-50 rounded-2xl border border-green-100 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <i class="fas fa-university text-2xl text-white"></i>
+                </div>
+                <h3 class="font-bold text-slate-800 mb-2">Single Sign-On</h3>
+                <p class="text-slate-500 text-sm mb-4">Login menggunakan akun SSO Universitas Negeri Jakarta</p>
+                <button onclick="handleSSOLogin()" class="w-full py-4 rounded-xl font-semibold text-white btn-sso flex items-center justify-center gap-2">
+                  <i class="fas fa-sign-in-alt"></i>
+                  Login dengan SSO UNJ
+                </button>
+              </div>
+              
+              <div class="flex items-center gap-4">
+                <div class="flex-1 h-px bg-slate-200"></div>
+                <span class="text-sm text-slate-400">atau</span>
+                <div class="flex-1 h-px bg-slate-200"></div>
+              </div>
+              
+              <p class="text-center text-sm text-slate-500">
+                Tidak punya akun SSO? 
+                <button onclick="switchTab('email')" class="text-green-600 hover:text-green-700 font-semibold">Login dengan Email</button>
+              </p>
+            </div>
+            
+            <!-- Email/NIP Login -->
+            <div id="emailForm" class="hidden space-y-5">
+              <form onsubmit="handleEmailLogin(event)">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                      <i class="fas fa-id-card mr-2 text-green-600"></i>NIP / Email
+                    </label>
+                    <input type="text" placeholder="Masukkan NIP atau email" class="input-field w-full px-4 py-3.5 rounded-xl text-sm" required>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                      <i class="fas fa-lock mr-2 text-green-600"></i>Password
+                    </label>
+                    <div class="relative">
+                      <input type="password" id="passwordInput" placeholder="Masukkan password" class="input-field w-full px-4 py-3.5 pr-12 rounded-xl text-sm" required>
+                      <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                        <i id="passwordIcon" class="fas fa-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center justify-between">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" class="w-4 h-4 text-green-600 rounded border-slate-300 focus:ring-green-500">
+                      <span class="text-sm text-slate-600">Ingat saya</span>
+                    </label>
+                    <a href="#" class="text-sm text-green-600 hover:text-green-700 font-medium">Lupa password?</a>
+                  </div>
+                </div>
+                
+                <button type="submit" class="w-full py-4 rounded-xl font-semibold text-white btn-login flex items-center justify-center gap-2 mt-6">
+                  <i class="fas fa-sign-in-alt"></i>
+                  Masuk ke Sistem
+                </button>
+              </form>
+              
+              <div class="flex items-center gap-4">
+                <div class="flex-1 h-px bg-slate-200"></div>
+                <span class="text-sm text-slate-400">atau</span>
+                <div class="flex-1 h-px bg-slate-200"></div>
+              </div>
+              
+              <p class="text-center text-sm text-slate-500">
+                Punya akun SSO? 
+                <button onclick="switchTab('sso')" class="text-green-600 hover:text-green-700 font-semibold">Login dengan SSO</button>
               </p>
             </div>
           </div>
-
-          <form onsubmit="handleLogin(event)" class="space-y-5">
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-2">
-                <i class="fas fa-id-card mr-2 text-green-600"></i>NIP / Username
-              </label>
-              <input
-                type="text"
-                placeholder="Masukkan NIP atau username"
-                class="input-field w-full px-4 py-3.5 rounded-xl text-sm"
-                required
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-2">
-                <i class="fas fa-lock mr-2 text-green-600"></i>Password
-              </label>
-              <div class="relative">
-                <input
-                  type="password"
-                  id="passwordInput"
-                  placeholder="Masukkan password"
-                  class="input-field w-full px-4 py-3.5 pr-12 rounded-xl text-sm"
-                  required
-                />
-                <button
-                  type="button"
-                  onclick="togglePassword()"
-                  class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  <i id="passwordIcon" class="fas fa-eye"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  class="w-4 h-4 text-green-600 rounded border-slate-300 focus:ring-green-500"
-                />
-                <span class="text-sm text-slate-600">Ingat saya</span>
-              </label>
-              <a
-                href="#"
-                class="text-sm text-green-600 hover:text-green-700 font-medium"
-                >Lupa password?</a
-              >
-            </div>
-
-            <button
-              type="submit"
-              class="w-full py-4 rounded-xl font-semibold text-white btn-login flex items-center justify-center gap-2"
-            >
-              <i class="fas fa-sign-in-alt"></i>
-              Masuk ke Sistem
-            </button>
-          </form>
-
-          <div class="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100">
-            <div class="flex items-start gap-3">
-              <i class="fas fa-info-circle text-amber-500 mt-0.5"></i>
-              <div>
-                <p class="text-sm text-amber-800 font-medium">Demo Mode</p>
-                <p class="text-xs text-amber-600 mt-1">
-                  Gunakan NIP dan password apapun untuk masuk ke wireframe demo.
-                </p>
+          
+          <!-- Demo Notice -->
+          <div class="px-8 pb-8">
+            <div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
+              <div class="flex items-start gap-3">
+                <i class="fas fa-info-circle text-amber-500 mt-0.5"></i>
+                <div>
+                  <p class="text-sm text-amber-800 font-medium">Demo Mode</p>
+                  <p class="text-xs text-amber-600 mt-1">Gunakan NIP/email dan password apapun untuk masuk ke wireframe demo.</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Footer -->
-      <div
-        class="text-center mt-8 animate-fade-in"
-        style="animation-delay: 0.2s"
-      >
-        <p class="text-green-100/60 text-sm">
-          © 2024 Satuan Pengawas Internal - Universitas Negeri Jakarta
-        </p>
-        <p class="text-green-100/40 text-xs mt-1">SIMTL v1.0</p>
+        
+        <!-- Footer -->
+        <div class="text-center mt-6 animate-fade-in" style="animation-delay: 0.2s">
+          <p class="text-green-100/60 text-sm">© 2024 Satuan Pengawas Internal</p>
+          <p class="text-green-100/40 text-xs mt-1">Universitas Negeri Jakarta</p>
+        </div>
       </div>
     </div>
-
+    
     <!-- Loading Overlay -->
-    <div
-      id="loadingOverlay"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center"
-    >
+    <div id="loadingOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
       <div class="bg-white rounded-2xl p-8 text-center shadow-2xl">
-        <div
-          class="w-16 h-16 rounded-full border-4 border-green-200 border-t-green-600 animate-spin mx-auto mb-4"
-        ></div>
+        <div class="w-16 h-16 rounded-full border-4 border-green-200 border-t-green-600 animate-spin mx-auto mb-4"></div>
         <p class="text-slate-800 font-semibold">Memproses login...</p>
         <p class="text-slate-500 text-sm mt-1">Mohon tunggu sebentar</p>
       </div>
     </div>
 
     <script>
-      let selectedRole = null;
-
-      const roleInfo = {
-        superadmin: {
-          name: "Superadmin",
-          icon: "fa-shield-alt",
-          desc: "Full System Access",
-        },
-        auditor: {
-          name: "Admin SPI / Auditor",
-          icon: "fa-clipboard-list",
-          desc: "Manage Audits",
-        },
-        pic: { name: "User PIC", icon: "fa-user", desc: "Penanggung Jawab" },
-        verifikator: {
-          name: "Verifikator",
-          icon: "fa-check-double",
-          desc: "Verify Documents",
-        },
-        ketua: {
-          name: "Ketua SPI",
-          icon: "fa-user-tie",
-          desc: "Final Approval",
-        },
-        pimpinan: {
-          name: "Pimpinan",
-          icon: "fa-landmark",
-          desc: "Executive View",
-        },
-      };
-
-      function selectRole(role, element) {
-        // Remove selected from all
-        document.querySelectorAll(".role-card").forEach((card) => {
-          card.classList.remove("selected");
-        });
-
-        // Add selected to clicked
-        element.classList.add("selected");
-        selectedRole = role;
-
-        // Enable next button
-        const btnNext = document.getElementById("btnNext");
-        const btnNextText = document.getElementById("btnNextText");
-        btnNext.disabled = false;
-        btnNextText.textContent = `Lanjut sebagai ${roleInfo[role].name}`;
-      }
-
-      function goToStep2() {
-        if (!selectedRole) return;
-
-        // Update step indicators
-        document.getElementById("step1Indicator").classList.remove("active");
-        document.getElementById("step1Indicator").classList.add("completed");
-        document.getElementById("step2Indicator").classList.add("active");
-        document
-          .getElementById("step2Indicator")
-          .classList.remove("bg-slate-200", "text-slate-500");
-
-        // Update selected role display
-        const info = roleInfo[selectedRole];
-        document.getElementById("selectedRoleIcon").innerHTML =
-          `<i class="fas ${info.icon} text-xl text-white"></i>`;
-        document.getElementById("selectedRoleName").textContent = info.name;
-
-        // Show step 2, hide step 1
-        document.getElementById("step1").classList.add("hidden");
-        document.getElementById("step2").classList.remove("hidden");
-        document.getElementById("step2").classList.add("animate-fade-in");
-      }
-
-      function goToStep1() {
-        // Reset step indicators
-        document.getElementById("step1Indicator").classList.add("active");
-        document.getElementById("step1Indicator").classList.remove("completed");
-        document.getElementById("step2Indicator").classList.remove("active");
-        document
-          .getElementById("step2Indicator")
-          .classList.add("bg-slate-200", "text-slate-500");
-
-        // Show step 1, hide step 2
-        document.getElementById("step2").classList.add("hidden");
-        document.getElementById("step1").classList.remove("hidden");
-        document.getElementById("step1").classList.add("animate-fade-in");
-      }
-
-      function togglePassword() {
-        const input = document.getElementById("passwordInput");
-        const icon = document.getElementById("passwordIcon");
-
-        if (input.type === "password") {
-          input.type = "text";
-          icon.classList.remove("fa-eye");
-          icon.classList.add("fa-eye-slash");
+      function switchTab(tab) {
+        const tabSSO = document.getElementById('tabSSO');
+        const tabEmail = document.getElementById('tabEmail');
+        const ssoForm = document.getElementById('ssoForm');
+        const emailForm = document.getElementById('emailForm');
+        
+        if (tab === 'sso') {
+          tabSSO.classList.add('active');
+          tabEmail.classList.remove('active');
+          ssoForm.classList.remove('hidden');
+          emailForm.classList.add('hidden');
         } else {
-          input.type = "password";
-          icon.classList.remove("fa-eye-slash");
-          icon.classList.add("fa-eye");
+          tabEmail.classList.add('active');
+          tabSSO.classList.remove('active');
+          emailForm.classList.remove('hidden');
+          ssoForm.classList.add('hidden');
         }
       }
-
-      function handleLogin(event) {
-        event.preventDefault();
-
-        // Show loading
-        const loadingOverlay = document.getElementById("loadingOverlay");
-        loadingOverlay.classList.remove("hidden");
-        loadingOverlay.classList.add("flex");
-
-        // Simulate login process
+      
+      function togglePassword() {
+        const input = document.getElementById('passwordInput');
+        const icon = document.getElementById('passwordIcon');
+        
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        } else {
+          input.type = 'password';
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      }
+      
+      function handleSSOLogin() {
+        showLoading();
         setTimeout(() => {
-          // Store selected role in localStorage
-          localStorage.setItem("simtl_role", selectedRole);
-
-          // Redirect to main dashboard
-          window.location.href = "index.html?role=" + selectedRole;
+          window.location.href = 'index.html';
         }, 1500);
       }
-
-      // Check if returning from index with a role
-      const urlParams = new URLSearchParams(window.location.search);
-      const roleParam = urlParams.get("role");
-      if (roleParam && roleInfo[roleParam]) {
-        // Pre-select the role
+      
+      function handleEmailLogin(event) {
+        event.preventDefault();
+        showLoading();
         setTimeout(() => {
-          const roleCards = document.querySelectorAll(".role-card");
-          const roles = [
-            "superadmin",
-            "auditor",
-            "pic",
-            "verifikator",
-            "ketua",
-            "pimpinan",
-          ];
-          const index = roles.indexOf(roleParam);
-          if (index !== -1) {
-            selectRole(roleParam, roleCards[index]);
-          }
-        }, 100);
+          window.location.href = 'index.html';
+        }, 1500);
+      }
+      
+      function showLoading() {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        loadingOverlay.classList.remove('hidden');
+        loadingOverlay.classList.add('flex');
       }
     </script>
   </body>
